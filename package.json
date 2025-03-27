@@ -1,10 +1,10 @@
 {
   "name": "ai-agent",
   "version": "1.0.0",
-  "main": "index.js",
   "type": "module",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "nodemon src/app.js",
+    "start": "tsx watch src/app.ts",
     "build": "tsc",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
@@ -29,6 +29,7 @@
     "eslint-plugin-prettier": "^5.2.5",
     "globals": "^16.0.0",
     "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.28.0"
   }

@@ -1,7 +1,6 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import ollama from "ollama";
 import { ChatOllama } from "@langchain/ollama";
-
 import { AI_MODEL_NAME, PORT } from "./config";
 
 const model = new ChatOllama({
@@ -13,12 +12,12 @@ const router = express.Router();
 
 app.use(express.json());
 
-router.post("/ask", async (req: any, res: any) => {
+router.post("/ask", async (req: Request, res: Response) => {
   const { query } = req.body;
 
   try {
     const response = await ollama.chat({
-      model: "qwen2.5-coder:3b-instruct-q4_K_M",
+      model: AI_MODEL_NAME,
       messages: [{ role: "user", content: query }],
     });
 
