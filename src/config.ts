@@ -1,3 +1,7 @@
 export const AI_MODEL_NAME = "qwen2.5-coder:3b-instruct-q4_K_M";
 
 export const PORT = 4000;
+
+export const IMAGE_GENERATION_MODEL = "FLUX.1";
+
+export const TAVILY_API_KEY = "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";
