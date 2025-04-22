@@ -10,5 +10,12 @@
     "source.fixAll.prettier": "always", // Run Prettier formatting on save
     "source.fixAll.eslint": "always" // Run ESLint autofix on save
   },
-  "eslint.validate": ["javascript", "javascriptreact"]
+  "eslint.validate": ["javascript", "javascriptreact"],
+  "github.copilot.enable": {
+    "*": false,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false,
+    "tex": false
+  }
 }

@@ -1,8 +1,11 @@
 import express, { Request, Response } from "express";
 
 import { ChatOllama } from "@langchain/ollama";
+import { BaseLanguageModelInput } from "@langchain/core/language_models/base";
+import { StructuredOutputParser } from "langchain/output_parsers";
 
 import { AI_MODEL_NAME, PORT } from "./config";
+import { tools } from "./tools";
 
 type ParsedResponseType = {
   type: string;
@@ -19,49 +22,51 @@ const router = express.Router();
 
 app.use(express.json());
 
-const getWeatherDetails = (city: string) => {
-  if (city === "patiala") {
-    return "10°C";
-  } else if (city === "mohali") {
-    return "14°C";
-  } else if (city === "mumbai") {
-    return "12°C";
-  } else if (city === "okra") {
-    return "15°C";
-  } else if (city === "kollam") {
-    return "16°C";
-  } else if (city === "delhi") {
-    return "18°C";
-  }
-};
-
-const tools = {
-  getWeatherDetails,
-};
+const parser = StructuredOutputParser.fromNamesAndDescriptions({
+  type: "The kind of step: user, plan, action, observation, or output",
+  function: "The name of the function to call (optional)",
+  input: "The input to the function (optional)",
+  user: "Original user question (optional)",
+  plan: "Planning step (optional)",
+  observation: "Observation from the tool (optional)",
+  output: "Final output to user (optional)",
+});
 
 const SYSTEM_PROMPT = `
-You are an AI Assistant with START, PLAN, ACTION, Observation and Output State. 
-Wait for the user prompt and first PLAN using available tools. 
-After Planning, take the action with appropriate tools and wait for Observation based on Action. Once you get the observations, return the AI response based on START propmt and observations 
+You are an AI Agent that follows a structured reasoning loop with the format:
+user → plan → action → observation → output
 
-Strictly follow the JSON output format as in examples for your response.
+You have the following tool available:
+- getWeatherDetails(city: string): Returns the weather of the given city.
 
-Available Tools: — function getWeatherDetails(city: string): string 
-getWeatherDetails is a function that accepts city name as string and retuns the weather details 
+Instructions:
+1. Use the tool only when necessary — if the answer requires real-time data.
+2. Always follow the order: user → plan → action → observation → output.
+3. Each step must be represented as a **JSON object** with a "type" field.
+4. Return **one single JSON array** containing all reasoning steps.
+5. Do not wrap the JSON in quotes.
+6. Do not include markdown, extra text, or explanations. Just return raw JSON.
+7. Do not return separate JSON blocks. Combine all steps in a single array.
 
-Example: 
-START 
- { "type": "user", "user": "What is the sum of weather of Patiala and Mohali?" }
- { "type": "plan", "plan": "I will call the getWeatherDetails for Patiala" }
- { "type": "action", "function": "getWeatherDetails", "input": "patiala" }
- { "type": "observation", "observation": "10°C" }
- { "type": "plan", "plan": "I will call getWeatherDetails for Mohali" }
- { "type": "action", "function": "getWeatherDetails", "input": "mohali" }
- { "type": "observation", "observation": "14°C" }
- { "type": "output", "output": The sum of weather of Patiala and Mohali is 24°C" }`;
+Example:
+[
+  { "type": "user", "user": "What is the sum of weather in Patiala and Mohali?" },
+  { "type": "plan", "plan": "Get weather for Patiala" },
+  { "type": "action", "function": "getWeatherDetails", "input": "patiala" },
+  { "type": "observation", "observation": "10°C" },
+  { "type": "plan", "plan": "Now get weather for Mohali" },
+  { "type": "action", "function": "getWeatherDetails", "input": "mohali" },
+  { "type": "observation", "observation": "14°C" },
+  { "type": "output", "output": "The sum is 24°C" }
+]
+
+Respond using this exact format.
+`;
 
 router.get("/ask", async (req: Request, res: Response) => {
-  const query = JSON.stringify(req.query);
+  const query = req.query.query as string;
+
+  console.log("query: ", query);
 
   if (!query) {
     res.status(500).send({ reply: "Please make sure to enter your query" });
@@ -72,85 +77,65 @@ router.get("/ask", async (req: Request, res: Response) => {
       temperature: 0.7,
     });
 
-    console.log("query\n", query);
-    console.log("---------------------------------------");
-    console.log("");
-
-    const response = await AIModel.invoke([
+    const messages: BaseLanguageModelInput = [
       ["system", SYSTEM_PROMPT],
       ["user", query],
-    ]);
+    ];
 
-    console.log("response: ", response?.content);
+    const recursiveAICall = async () => {
+      const AIResponse = await AIModel.invoke(messages);
 
-    // const messages = [{ role: "system", content: SYSTEM_PROMPT }];
+      console.log("AIResponse?.content: ", JSON.stringify(AIResponse?.content));
 
-    // const userMessage = {
-    //   role: "user",
-    //   user: query,
-    // };
-    // messages.push({
-    //   role: "user",
-    //   content: JSON.stringify(userMessage),
+      const stringifiedAIResponnse = (AIResponse?.content as string)
+        ?.replace("json", "")
+        .replaceAll("```", "");
+
+      // const parsedOutput = await parser.parse(AIResponse.content as string);
+
+      messages.push({
+        role: "assistant",
+        content: stringifiedAIResponnse,
+      });
+
+      const {
+        type,
+        function: func,
+        input,
+        output,
+      } = JSON.parse(stringifiedAIResponnse as string) as ParsedResponseType;
+
+      if (type === "output") {
+        console.log("Hit: ", 1);
+        res.status(200).send({
+          reply: output || AIResponse?.content || "AI Model didn't respond",
+        });
+      } else if (type === "action") {
+        console.log("Hit: ", 2);
+        const actionFunction = tools[func];
+        const observation = actionFunction(input);
+
+        const observationObject = {
+          type: "observation",
+          observation: observation,
+        };
+
+        messages.push({
+          role: "developer",
+          content: JSON.stringify(observationObject),
+        });
+        recursiveAICall();
+      } else {
+        console.log("Hit: ", 3);
+        recursiveAICall();
+      }
+    };
+
+    recursiveAICall();
+
+    // res.status(200).send({
+    //   reply: AIResponse?.content || "AI Model didn't respond",
     // });
-
-    // while (true) {
-    //   const response = await AIModel.invoke(messages);
-
-    //   console.log(
-    //     "\n\n-------------------------------------response: \n",
-    //     response
-    //   );
-
-    //   const result = response?.content;
-
-    //   console.log(
-    //     "\n\n*************************************result:  \n",
-    //     result
-    //   );
-
-    //   messages.push({
-    //     role: "assistant",
-    //     content: JSON.stringify(result),
-    //   });
-
-    //   const parsedResponse = JSON.parse(JSON.stringify(result));
-
-    //   console.log(
-    //     "\n\n+++++++++++++++++++++++++++++++++++++parsedResponse:  \n",
-    //     parsedResponse
-    //   );
-
-    //   const {
-    //     type,
-    //     function: func,
-    //     input,
-    //     output,
-    //   } = parsedResponse as ParsedResponseType;
-
-    //   if (type === "output") {
-    //     res.status(200).send({
-    //       reply: output || response?.content || "AI Model didn't respond",
-    //     });
-    //     break;
-    //   } else if (type === "action") {
-    //     const actionFunction = tools[func];
-    //     const observation = actionFunction(input);
-
-    //     const observationObject = {
-    //       type: "observation",
-    //       observation: observation,
-    //     };
-
-    //     messages.push({
-    //       role: "developer",
-    //       content: JSON.stringify(observationObject),
-    //     });
-    //   }
-    // }
-    res.status(200).send({
-      reply: response?.content || "AI Model didn't respond",
-    });
   } catch (err) {
     res.status(500).send({ error: "Error interacting with the model" });
   }
@@ -158,6 +143,4 @@ router.get("/ask", async (req: Request, res: Response) => {
 
 app.use("/api", router);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+app.listen(PORT, () => {});

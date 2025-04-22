@@ -1,6 +1,6 @@
 export const AI_MODEL_NAME = "qwen2.5-coder:3b-instruct-q4_K_M";
 
-export const PORT = 4000;
+export const PORT = 5000;
 
 export const IMAGE_GENERATION_MODEL = "FLUX.1";
 
