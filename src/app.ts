@@ -33,34 +33,93 @@ const parser = StructuredOutputParser.fromNamesAndDescriptions({
 });
 
 const SYSTEM_PROMPT = `
-You are an AI Agent that follows a structured reasoning loop with the format:
-user → plan → action → observation → output
+You are an AI agent that operates using a structured reasoning loop:  
+plan → action → observation → output
 
-You have the following tool available:
-- getWeatherDetails(city: string): Returns the weather of the given city.
+Behavior Rules:
 
-Instructions:
-1. Use the tool only when necessary — if the answer requires real-time data.
-2. Always follow the order: user → plan → action → observation → output.
-3. Each step must be represented as a **JSON object** with a "type" field.
-4. Return **one single JSON array** containing all reasoning steps.
-5. Do not wrap the JSON in quotes.
-6. Do not include markdown, extra text, or explanations. Just return raw JSON.
-7. Do not return separate JSON blocks. Combine all steps in a single array.
+- You will receive a list of previously executed reasoning steps in JSON format.
+- Each step is a JSON object with a "type" field.
+- Your role is to analyze the latest step and respond with the next logical step as a single JSON object.
+- Follow the reasoning flow strictly:  
+  plan → action → observation → (repeat if needed) → output
+
+Thought Process:
+
+- plan: Think about what needs to be done next.
+- action: If the plan involves a tool, invoke it.
+- observation: Analyze the result returned by the action.
+- output: When all data is available, generate the final response.
+
+Available Tools:
+- getWeatherDetails(city: string)  
+  → Returns real-time weather for the specified city.
+
+> Only use tools if the task requires real-time data.  
+> Do not skip reasoning steps.  
+> Never respond with multiple steps — return just the next step.
+
+Response Format:
+Respond with one raw JSON object, no markdown, no quotes, no extra text.
 
 Example:
+You get
+{ role: "human", content: '{"type": "user", "user": "What is the sum of weather in Patiala and Mohali?"}' }
+→ You return:
+{ "type": "plan", "plan": "Get weather for Patiala" }
+
+→ You get:
 [
-  { "type": "user", "user": "What is the sum of weather in Patiala and Mohali?" },
-  { "type": "plan", "plan": "Get weather for Patiala" },
-  { "type": "action", "function": "getWeatherDetails", "input": "patiala" },
-  { "type": "observation", "observation": "10°C" },
-  { "type": "plan", "plan": "Now get weather for Mohali" },
-  { "type": "action", "function": "getWeatherDetails", "input": "mohali" },
-  { "type": "observation", "observation": "14°C" },
-  { "type": "output", "output": "The sum is 24°C" }
+  { role: "human", content: '{"type": "user", "user": "What is the sum of weather in Patiala and Mohali?"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Patiala"}' }
+]
+→ You return:
+{ "type": "action", "function": "getWeatherDetails", "input": "patiala" }
+
+→ You get:
+[
+  { role: "human", content: '{"type": "user", "user": "What is the sum of weather in Patiala and Mohali?"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Patiala"}' },
+  { role: "human", content: '{"type": "action", "function": "getWeatherDetails", "input": "patiala"}' },
+  { role: "human", content: '{"type": "observation", "observation": "14°C"}' }
+]
+→ You return:
+{ "type": "plan", "plan": "Get weather for Mohali" }
+
+→ You get:
+[
+  { role: "human", content: '{"type": "user", "user": "What is the sum of weather in Patiala and Mohali?"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Patiala"}' },
+  { role: "human", content: '{"type": "action", "function": "getWeatherDetails", "input": "patiala"}' },
+  { role: "human", content: '{"type": "observation", "observation": "14°C"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Mohali"}' },
+]
+→ You return:
+  { "type": "action", "function": "getWeatherDetails", "input": "mohali" }
+
+→ You get:
+[
+  { role: "human", content: '{"type": "user", "user": "What is the sum of weather in Patiala and Mohali?"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Patiala"}' },
+  { role: "human", content: '{"type": "action", "function": "getWeatherDetails", "input": "patiala"}' },
+  { role: "human", content: '{"type": "observation", "observation": "14°C"}' },
+  { role: "human", content: '{"type": "plan", "plan": "Get weather for Mohali"}' },
+  { role: "human", content: '{"type": "action", "function": "getWeatherDetails", "input": "mohali"}' },
+  { role: "human", content: '{"type": "observation", "observation": "10°C"}' }
 ]
 
-Respond using this exact format.
+→ Finally since you have both weather details you respond with the sum in JSON:
+{ "type": "output", "output": "The sum of weather of Patiala and Mohali is 24°C" }
+
+
+Even if you don't want to use tools respond in json format only.
+Example: 
+
+You get
+{ role: "human", content: '{"type": "user", "user": "Hello"}' }
+→ You return:
+{ "type": "output", "output": "Hello" }
+
 `;
 
 router.get("/ask", async (req: Request, res: Response) => {
@@ -78,24 +137,26 @@ router.get("/ask", async (req: Request, res: Response) => {
     });
 
     const messages: BaseLanguageModelInput = [
-      ["system", SYSTEM_PROMPT],
-      ["user", query],
+      {
+        role: "system",
+        content: `{ type: "system", system: ${SYSTEM_PROMPT} }`,
+      },
+      { role: "human", content: `{ type: "user", user: ${query} }` },
     ];
+
+    console.log(
+      "messages: ",
+      messages.filter((a, i) => i !== 0)
+    );
 
     const recursiveAICall = async () => {
       const AIResponse = await AIModel.invoke(messages);
 
-      console.log("AIResponse?.content: ", JSON.stringify(AIResponse?.content));
-
-      const stringifiedAIResponnse = (AIResponse?.content as string)
-        ?.replace("json", "")
-        .replaceAll("```", "");
-
-      // const parsedOutput = await parser.parse(AIResponse.content as string);
+      console.log("AIResponse: ", AIResponse?.content);
 
       messages.push({
-        role: "assistant",
-        content: stringifiedAIResponnse,
+        role: "human",
+        content: JSON.stringify(AIResponse?.content),
       });
 
       const {
@@ -103,39 +164,36 @@ router.get("/ask", async (req: Request, res: Response) => {
         function: func,
         input,
         output,
-      } = JSON.parse(stringifiedAIResponnse as string) as ParsedResponseType;
+      } = JSON.parse(AIResponse?.content as string) as ParsedResponseType;
 
       if (type === "output") {
-        console.log("Hit: ", 1);
         res.status(200).send({
           reply: output || AIResponse?.content || "AI Model didn't respond",
         });
       } else if (type === "action") {
-        console.log("Hit: ", 2);
-        const actionFunction = tools[func];
-        const observation = actionFunction(input);
+        if (!tools[func]) {
+          recursiveAICall();
+        } else {
+          const actionFunction = tools[func];
+          const observation = actionFunction(input);
 
-        const observationObject = {
-          type: "observation",
-          observation: observation,
-        };
+          const observationObject = {
+            type: "observation",
+            observation: observation,
+          };
 
-        messages.push({
-          role: "developer",
-          content: JSON.stringify(observationObject),
-        });
-        recursiveAICall();
+          messages.push({
+            role: "human",
+            content: JSON.stringify(observationObject),
+          });
+          recursiveAICall();
+        }
       } else {
-        console.log("Hit: ", 3);
         recursiveAICall();
       }
     };
 
     recursiveAICall();
-
-    // res.status(200).send({
-    //   reply: AIResponse?.content || "AI Model didn't respond",
-    // });
   } catch (err) {
     res.status(500).send({ error: "Error interacting with the model" });
   }

@@ -12,5 +12,7 @@ export const getWeatherDetails = (city: string) => {
     return "16°C";
   } else if (city === "delhi") {
     return "18°C";
+  } else {
+    return `Sorry no weather data found for ${city}`;
   }
 };
