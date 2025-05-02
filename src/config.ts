@@ -1,7 +1,9 @@
 // export const AI_MODEL_NAME = "qwen2.5-coder:3b-instruct-q4_K_M";
 export const AI_MODEL_NAME = "openhermes:latest";
 
-export const PORT = 5000;
+export const AGENT_BACKEND_PORT = 5000;
+
+export const AGENT_EMBEDDING_PORT = 5001;
 
 export const IMAGE_GENERATION_MODEL = "FLUX.1";
 
