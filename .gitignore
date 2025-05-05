@@ -1,3 +1,6 @@
-node_modules
-dist
-qdrant_storage
+roxie-agent/node_modules
+roxie-agent/dist
+roxie-agent/qdrant_storage
+
+roxie-embedder/__pycache__
+roxie-embedder/venv

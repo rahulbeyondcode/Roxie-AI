@@ -7,6 +7,7 @@ import { StructuredOutputParser } from "langchain/output_parsers";
 
 import { AI_MODEL_NAME, AGENT_BACKEND_PORT } from "./config";
 import { tools } from "./tools";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 
 dotenv.config();
 
@@ -174,14 +175,18 @@ router.get("/ask", async (req: Request, res: Response) => {
       temperature: 0.7,
     });
 
-    const messages: BaseLanguageModelInput = [
-      {
-        role: "system",
-        content: `{ type: "system", system: ${SYSTEM_PROMPT} }`,
-      },
-      { role: "human", content: `{ type: "user", user: ${query} }` },
-    ];
+    // const messages: BaseLanguageModelInput = [
+    //   {
+    //     role: "system",
+    //     content: `{ type: "system", system: ${SYSTEM_PROMPT} }`,
+    //   },
+    //   { role: "human", content: `{ type: "user", user: ${query} }` },
+    // ];
 
+    const messages: BaseLanguageModelInput = [
+      new SystemMessage(`{ type: "system", system: ${SYSTEM_PROMPT} }`),
+      new HumanMessage(`{ type: "user", user: ${query} }`),
+    ];
     console.log(
       "messages: ",
       messages.filter((a, i) => i !== 0)
