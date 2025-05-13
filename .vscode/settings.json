@@ -8,7 +8,9 @@
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.prettier": "always", // Run Prettier formatting on save
-    "source.fixAll.eslint": "always" // Run ESLint autofix on save
+    "source.fixAll.eslint": "always", // Run ESLint autofix on save
+    "source.organizeImports": "always",
+    "source.removeUnusedImports": "always"
   },
   "eslint.validate": ["javascript", "javascriptreact"],
   "github.copilot.enable": {

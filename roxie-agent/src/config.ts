@@ -1,5 +1,6 @@
 // export const AI_MODEL_NAME = "qwen2.5-coder:3b-instruct-q4_K_M";
-export const AI_MODEL_NAME = "openhermes:latest";
+// export const AI_MODEL_NAME = "openhermes:latest";
+export const AI_MODEL_NAME = "gemini-2.0-flash";
 
 export const AGENT_BACKEND_PORT = 5000;
 
