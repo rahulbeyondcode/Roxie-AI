@@ -29,11 +29,13 @@ const agent = createReactAgent({
   checkpointSaver,
 });
 
+const sessionId = generateRandomString(7);
+
 let isInitialLLMCall = false;
 
 router.post("/ask", async (req: Request, res: Response) => {
   const query = req.body?.query as string;
-  const thread_id = req.body?.thread_id || generateRandomString();
+  const thread_id = req.body?.thread_id || sessionId;
   let result;
 
   console.log(`🧑‍💻-> ${query}`);
@@ -59,8 +61,8 @@ router.post("/ask", async (req: Request, res: Response) => {
       );
     }
 
-    console.log(`\n🤖 -> ${result?.messages.at(-1)?.content}`);
-    console.log("\n\n");
+    console.log(`🤖 -> ${result?.messages.at(-1)?.content}`);
+    console.log("\n");
 
     res.json({ response: `🤖 -> ${result?.messages.at(-1)?.content}` });
   } catch (err) {
