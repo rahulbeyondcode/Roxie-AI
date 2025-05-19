@@ -1,6 +1,8 @@
 roxie-agent/node_modules
 roxie-agent/dist
-roxie-agent/qdrant_storage
+
+roxie-agent/db_qdrant_data
+roxie-agent/db_mongo_data
 
 roxie-embedder/__pycache__
 roxie-embedder/venv

@@ -1,3 +1,4 @@
-import { getWeatherDetails } from "./getWeatherDetails";
+import { createNewUser } from "./create-new-user";
+import { getAllCollections } from "./get-all-collections";
 
-export const tools = [getWeatherDetails];
+export const tools = [getAllCollections, createNewUser];
