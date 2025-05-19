@@ -46,22 +46,22 @@ export const createNewUser = tool(
         .optional()
         .describe("The person's contact number for calling or messaging."),
       date_of_birth: z
-        .date()
+        .string()
         .optional()
-        .describe("The person's date of birth, useful for age calculation or birthday reminders."),
+        .describe("The person's date of birth, useful for age calculation or birthday reminders. Always store in DD/MM/YYYY format"),
       occupation: z
         .string()
         .optional()
         .describe("The person's current job or profession."),
       last_called: z
-        .date()
+        .string()
         .optional()
-        .describe("The last time you called or spoke to this person, used for engagement tracking.")
+        .describe("The last time you called or spoke to this person, used for engagement tracking. Always store in DD/MM/YYYY hh:mm:ss A format")
         .optional(),
       last_met: z
         .string()
         .optional()
-        .describe("The most recent in-person meeting date with this person."),
+        .describe("The most recent in-person meeting date with this person. Always store in DD/MM/YYYY hh:mm:ss A format"),
       is_favorite: z
         .string()
         .optional()

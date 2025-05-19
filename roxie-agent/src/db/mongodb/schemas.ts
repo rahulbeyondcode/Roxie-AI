@@ -37,7 +37,7 @@ export const UserSchema = new mongoose.Schema({
     required: false,
   },
   date_of_birth: {
-    type: Date,
+    type: String,
     required: false,
   },
   occupation: {
@@ -45,11 +45,11 @@ export const UserSchema = new mongoose.Schema({
     required: false,
   },
   last_called: {
-    type: Date,
+    type: String,
     required: false,
   },
   last_met: {
-    type: Date,
+    type: String,
     required: false,
   },
   is_favorite: {
@@ -82,7 +82,7 @@ export const OfficeWorkSchema = new mongoose.Schema({
     required: false,
   },
   last_date: {
-    type: Date,
+    type: String,
     required: false,
   },
 })
@@ -107,7 +107,7 @@ export const TasksTodoSchema = new mongoose.Schema({
     required: false,
   },
   repeat_cycle: {
-    type: Date,
+    type: String,
     required: false,
   },
   status: {
@@ -115,7 +115,7 @@ export const TasksTodoSchema = new mongoose.Schema({
     required: false,
   },
   created_on: {
-    type: Date,
+    type: String,
     required: false,
   },
 })
@@ -141,7 +141,7 @@ export const MoneyBorrowerSchema = new mongoose.Schema({
     required: true,
   },
   borrowed_on: {
-    type: Date,
+    type: String,
     required: true,
   },
   return_on: {
@@ -221,11 +221,11 @@ export const HealthLogsSchema = new mongoose.Schema({
     required: true,
   },
   slept_on: {
-    type: Date,
+    type: String,
     required: false,
   },
   wokeup_at: {
-    type: Date,
+    type: String,
     required: true,
   },
   health_condition: {
