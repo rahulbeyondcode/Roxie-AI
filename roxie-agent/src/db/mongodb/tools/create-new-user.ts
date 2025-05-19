@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { User } from "../db/mongodb/models";
+import { User } from "../models";
 
 type PropType = {
   name: string;

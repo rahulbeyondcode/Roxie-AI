@@ -1,4 +1,4 @@
-import { createNewUser } from "./create-new-user";
-import { getAllCollections } from "./get-all-collections";
+import { createNewUser } from "../db/mongodb/tools/create-new-user";
+import { getAllCollections } from "../db/mongodb/tools/get-all-collections";
 
 export const tools = [getAllCollections, createNewUser];

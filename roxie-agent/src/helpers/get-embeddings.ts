@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { AGENT_EMBEDDING_PORT } from "../config";
+import { AGENT_EMBEDDING_PORT } from "./config";
 
 const fetchEmebddings = (text: string) => {
   axios

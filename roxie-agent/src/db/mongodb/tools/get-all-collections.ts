@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 
-import { CollectionNames } from '../db/mongodb/models';
+import { CollectionNames } from '../models';
 
 export const getAllCollections = tool(
   async () => {
