@@ -4,5 +4,7 @@ roxie-agent/dist
 roxie-agent/db_qdrant_data
 roxie-agent/db_mongo_data
 
+roxie-web-ui/node_modules
+
 roxie-embedder/__pycache__
 roxie-embedder/venv
