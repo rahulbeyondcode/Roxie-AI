@@ -1,6 +1,5 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { User } from "../models";
 
 type PropType = {
   name: string;
@@ -16,17 +15,48 @@ type PropType = {
   profile_photo_urls?: string;
 }
 
-export const createNewUser = tool(
+export const updateExistingUser = tool(
   async (input: PropType) => {
-    console.log('🛠️Create new User: ', input);
-    const user = await User.create(input);
-    return user
+    console.log('🛠️Update existing user: ', input);
+    // const user = await User.create(input);
+    // return user
   },
   {
-    name: "createNewUser",
+    name: "updateExistingUser",
     description:
-      "Use this tool when adding a **brand new person** to the user database who doesn't already exist. It stores key information like their name, location, relation (e.g., friend, colleague), birthday, phone number, notes, and photo links. Only use this if you're sure this person hasn't been added before. Avoid duplicates by not using this tool for updates.",
+      "Use this tool to **update the existing information** of a known person in the user database. This includes modifying their phone number, name, location, last contacted dates, or adding new notes. Only use this if the person is already present in the database. Do not use this tool for creating new profiles.",
     schema: z.object({
+      find_props: z.object({
+        name: z
+          .string()
+          .optional()
+          .describe("Full name of the person you want to search and find."),
+        location: z
+          .string()
+          .optional()
+          .describe("The city or general location to search in db to filter user."),
+        relation: z
+          .string()
+          .optional()
+          .describe("The type of relationship you have with the person to be searched"),
+        phone_number: z
+          .string()
+          .optional()
+          .describe("Contact number to be searched in db."),
+        date_of_birth: z
+          .string()
+          .optional()
+          .describe("The person's date of birth in DD/MM/YYYY format for searching"),
+        occupation: z
+          .string()
+          .optional()
+          .describe("The person's current job or profession."),
+        is_favorite: z
+          .string()
+          .optional()
+          .describe("Boolean flag indicating whether this person is marked as a favorite (true or false)."),
+      }).describe('A set of identifying properties used to locate an existing user in the database before updating their information. These fields act as filters to match the correct user. You should fill in as many of these as you confidently know, especially name, relation, or phone_number, to increase the chance of finding the right person. At least one field must be provided.'),
+
       name: z
         .string()
         .describe("Full name of the person you want to remember or interact with."),

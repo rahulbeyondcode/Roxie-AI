@@ -13,7 +13,7 @@ import {
 } from './schemas';
 
 export const CalendarEvents = mongoose.model("calendar_events", CalendarEventsSchema);
-export const CollectionNames = mongoose.model("collection_names", CollectionNamesSchema);
+export const CollectionNames = mongoose.model("all_collections", CollectionNamesSchema);
 export const ConversationSummary = mongoose.model("conversation_summary", ConversationSummarySchema);
 export const FavouriteSongs = mongoose.model("favourite_songs", FavouriteSongsSchema);
 export const Grocery = mongoose.model("grocery", GrocerySchema);
