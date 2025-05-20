@@ -1,7 +1,10 @@
 import { tool } from "@langchain/core/tools";
+import mongoose from "mongoose";
 import { z } from "zod";
+import { User } from "../models";
 
-type PropType = {
+type UserObject = {
+  _id?: mongoose.Types.ObjectId;
   name: string;
   location?: string;
   relation: string;
@@ -15,11 +18,63 @@ type PropType = {
   profile_photo_urls?: string;
 }
 
+type UpdatePropType = {
+  find_props: {
+    name: string;
+    location?: string;
+    relation: string;
+    phone_number?: number;
+    date_of_birth?: string;
+    occupation?: string;
+    is_favorite?: boolean;
+  },
+} & UserObject
+
 export const updateExistingUser = tool(
-  async (input: PropType) => {
-    console.log('🛠️Update existing user: ', input);
-    // const user = await User.create(input);
-    // return user
+  async (payload: UpdatePropType) => {
+    console.log('🛠️  Update existing user: ', payload);
+
+    const input = payload.find_props;
+    let usersList = [] as UserObject[];
+
+    if (input?.name) {
+      const user = await User.find({ name: { $regex: input?.name?.toLowerCase(), $options: "i" } })
+      usersList = user as UserObject[]
+    } else if (input?.location) {
+      const user = await User.find({ location: { $regex: input?.location?.toLowerCase(), $options: "i" } })
+      usersList = user as UserObject[]
+    } else if (input?.relation) {
+      const user = await User.find({ relation: { $regex: input?.relation?.toLowerCase(), $options: "i" } })
+      usersList = user as UserObject[]
+    } else if (input?.phone_number) {
+      const user = await User.find({ phone_number: input?.phone_number })
+      usersList = user as UserObject[]
+    } else if (input?.date_of_birth) {
+      const user = await User.find({ date_of_birth: { $regex: input?.date_of_birth?.toLowerCase(), $options: "i" } })
+      usersList = user as UserObject[]
+    } else if (input?.occupation) {
+      const user = await User.find({ occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" } })
+      usersList = user as UserObject[]
+    } else if (input?.is_favorite) {
+      const user = await User.find({ is_favorite: input?.is_favorite })
+      usersList = user as UserObject[]
+    }
+
+    if (usersList.length === 0) {
+      return "No users found"
+    }
+    if (usersList.length === 1) {
+      const userId = usersList?.[0]?._id
+      const updatedPayload = { ...payload } as any;
+      delete updatedPayload.find_props;
+
+      const updatedUser = await User.findByIdAndUpdate(userId, updatedPayload, { new: true })
+
+      return `Done. Updated user fetched from DB: ${JSON.stringify(updatedUser)}`
+    }
+    if (usersList.length > 1) {
+      return `Multiple users found. Help to identify. Users: ${JSON.stringify(usersList)}`
+    }
   },
   {
     name: "updateExistingUser",

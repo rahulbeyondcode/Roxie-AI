@@ -18,7 +18,7 @@ type PropType = {
 
 export const createNewUser = tool(
   async (input: PropType) => {
-    console.log('🛠️Create new User: ', input);
+    console.log('🛠️  Create new User: ', input);
     const user = await User.create(input);
     return user
   },

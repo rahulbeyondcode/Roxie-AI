@@ -4,7 +4,7 @@ import { CollectionNames } from '../models';
 
 export const getAllCollections = tool(
   async () => {
-    console.log('🛠️Get all collections');
+    console.log('🛠️  Get all collections');
     const allCollections = await CollectionNames.find();
     return JSON.stringify(allCollections);
   },
