@@ -21,6 +21,7 @@
     "@langchain/ollama": "^0.2.0",
     "@qdrant/js-client-rest": "^1.14.0",
     "axios": "^1.9.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
     "langchain": "^0.3.24",
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",
+    "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",

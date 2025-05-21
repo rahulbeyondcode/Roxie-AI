@@ -2,6 +2,7 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 
@@ -15,6 +16,7 @@ dotenv.config();
 const app = express();
 const router = express.Router();
 
+app.use(cors());
 app.use(express.json());
 
 const AIModel = new ChatGoogleGenerativeAI({
