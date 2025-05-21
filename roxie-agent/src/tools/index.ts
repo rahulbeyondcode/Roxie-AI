@@ -1,6 +1,9 @@
-import { createNewUser } from "../db/mongodb/tools/create-new-user";
-import { findUsers } from "../db/mongodb/tools/find-user";
-import { getAllCollections } from "../db/mongodb/tools/get-all-collections";
-import { updateExistingUser } from "../db/mongodb/tools/update-existing-user";
+import * as mongoDBTools from "../db/mongodb/tools";
+import * as qdrantTools from "../db/qdrant/tools";
 
-export const tools = [getAllCollections, createNewUser, updateExistingUser, findUsers];
+import getCurrentDateTime from './getCurrentDateTime';
+
+const { createNewUser, findUsers, getAllCollections, updateExistingUser } = mongoDBTools
+const { } = qdrantTools
+
+export const tools = [getAllCollections, createNewUser, updateExistingUser, findUsers, getCurrentDateTime];

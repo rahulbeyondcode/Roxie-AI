@@ -25,6 +25,7 @@ export const UserSchema = new mongoose.Schema({
   },
   relation: {
     type: String,
+    enum: ['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'],
     required: true,
     lowercase: true,
   },

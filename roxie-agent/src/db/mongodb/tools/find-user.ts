@@ -16,7 +16,7 @@ type PropType = {
   profile_photo_urls?: string;
 }
 
-export const findUsers = tool(
+const findUsers = tool(
   async (input: PropType) => {
     console.log('🛠️  Find Users: ', input);
     let usersList = [];
@@ -53,7 +53,7 @@ export const findUsers = tool(
   {
     name: "findUser",
     description:
-      "Use this tool to search for a specific person in the user database using known attributes such as their name, relation, location, phone number, date of birth, or occupation. This is useful when you need to verify if a person already exists before performing any update or to fetch their details for contextual purposes.",
+      "Call this tool to search for people using **any available info** — even just the relation (e.g., 'wife', 'best friend'). It's safe to call without a name. If multiple matches are found, show them and let the user choose. If no match is found, ask for other fields like name, occupation, location, or phone number. **Don't wait for the name — use what you have.** Don't overwhelm the user with constant questioning",
     schema: z.object({
       name: z
         .string()
@@ -64,7 +64,7 @@ export const findUsers = tool(
         .optional()
         .describe("The city or general location to search in db."),
       relation: z
-        .string()
+        .enum(['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'])
         .optional()
         .describe("The type of relationship with the person to be searched"),
       phone_number: z
@@ -86,3 +86,5 @@ export const findUsers = tool(
     }),
   }
 );
+
+export default findUsers;

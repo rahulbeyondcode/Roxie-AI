@@ -30,7 +30,7 @@ type UpdatePropType = {
   },
 } & UserObject
 
-export const updateExistingUser = tool(
+const updateExistingUser = tool(
   async (payload: UpdatePropType) => {
     console.log('🛠️  Update existing user: ', payload);
 
@@ -91,7 +91,7 @@ export const updateExistingUser = tool(
           .optional()
           .describe("The city or general location to search in db to filter user."),
         relation: z
-          .string()
+          .enum(['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'])
           .optional()
           .describe("The type of relationship you have with the person to be searched"),
         phone_number: z
@@ -120,7 +120,7 @@ export const updateExistingUser = tool(
         .optional()
         .describe("The city or general location where the person lives or is currently based."),
       relation: z
-        .string()
+        .enum(['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'])
         .describe("The type of relationship you have with this person (e.g., friend, brother, colleague etc)."),
       notes: z
         .string()
@@ -158,3 +158,5 @@ export const updateExistingUser = tool(
     }),
   }
 );
+
+export default updateExistingUser;

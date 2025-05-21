@@ -2,7 +2,7 @@ import { tool } from "@langchain/core/tools";
 
 import { CollectionNames } from '../models';
 
-export const getAllCollections = tool(
+const getAllCollections = tool(
   async () => {
     console.log('🛠️  Get all collections');
     const allCollections = await CollectionNames.find();
@@ -14,3 +14,5 @@ export const getAllCollections = tool(
       "Stores metadata about all defined collections, including their name and description. Helpful for listing available memory modules or debugging",
   }
 );
+
+export default getAllCollections;
