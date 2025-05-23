@@ -25,7 +25,27 @@ export const UserSchema = new mongoose.Schema({
   },
   relation: {
     type: String,
-    enum: ['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'],
+    enum: [
+      "father",
+      "mother",
+      "sister",
+      "wife",
+      "uncle",
+      "aunt",
+      "cousin",
+      "grandfather",
+      "father-in-law",
+      "mother-in-law",
+      "brother-in-law",
+      "sister-in-law",
+      "friend",
+      "bestfriend",
+      "colleague",
+      "classmate",
+      "neighbor",
+      "mentor",
+      "teacher",
+    ],
     required: true,
     lowercase: true,
   },
@@ -61,7 +81,7 @@ export const UserSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-})
+});
 
 export const OfficeWorkSchema = new mongoose.Schema({
   task_id: {
@@ -86,7 +106,7 @@ export const OfficeWorkSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-})
+});
 
 export const TasksTodoSchema = new mongoose.Schema({
   task_type: {
@@ -119,7 +139,7 @@ export const TasksTodoSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-})
+});
 
 export const GrocerySchema = new mongoose.Schema({
   item_name: {
@@ -130,7 +150,7 @@ export const GrocerySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
+});
 
 export const MoneyBorrowerSchema = new mongoose.Schema({
   name: {
@@ -157,7 +177,7 @@ export const MoneyBorrowerSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
+});
 
 export const FavouriteSongsSchema = new mongoose.Schema({
   name: {
@@ -176,7 +196,7 @@ export const FavouriteSongsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
+});
 
 export const CalendarEventsSchema = new mongoose.Schema({
   event_name: {
@@ -199,7 +219,7 @@ export const CalendarEventsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
+});
 
 export const ConversationSummarySchema = new mongoose.Schema({
   thread_id: {
@@ -214,7 +234,7 @@ export const ConversationSummarySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
+});
 
 export const HealthLogsSchema = new mongoose.Schema({
   date: {
@@ -233,5 +253,4 @@ export const HealthLogsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-})
-
+});

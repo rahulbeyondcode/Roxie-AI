@@ -14,13 +14,13 @@ type PropType = {
   last_met?: string;
   is_favorite?: boolean;
   profile_photo_urls?: string;
-}
+};
 
 const createNewUser = tool(
   async (input: PropType) => {
-    console.log('🛠️  Create new User: ', input);
+    console.log("🛠️  Create new User: ", input);
     const user = await User.create(input);
-    return user
+    return user;
   },
   {
     name: "createNewUser",
@@ -29,18 +29,46 @@ const createNewUser = tool(
     schema: z.object({
       name: z
         .string()
-        .describe("Full name of the person you want to remember or interact with."),
+        .describe(
+          "Full name of the person you want to remember or interact with."
+        ),
       location: z
         .string()
         .optional()
-        .describe("The city or general location where the person lives or is currently based."),
+        .describe(
+          "The city or general location where the person lives or is currently based."
+        ),
       relation: z
-        .enum(['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'])
-        .describe("The type of relationship you have with this person (e.g., friend, brother, colleague etc)."),
+        .enum([
+          "father",
+          "mother",
+          "sister",
+          "wife",
+          "uncle",
+          "aunt",
+          "cousin",
+          "grandfather",
+          "father-in-law",
+          "mother-in-law",
+          "brother-in-law",
+          "sister-in-law",
+          "friend",
+          "bestfriend",
+          "colleague",
+          "classmate",
+          "neighbor",
+          "mentor",
+          "teacher",
+        ])
+        .describe(
+          "The type of relationship you have with this person (e.g., friend, brother, colleague etc)."
+        ),
       notes: z
         .string()
         .optional()
-        .describe("Any extra notes or personal information about the person, such as preferences or memories."),
+        .describe(
+          "Any extra notes or personal information about the person, such as preferences or memories."
+        ),
       phone_number: z
         .string()
         .optional()
@@ -48,7 +76,9 @@ const createNewUser = tool(
       date_of_birth: z
         .string()
         .optional()
-        .describe("The person's date of birth, useful for age calculation or birthday reminders. Always store in DD/MM/YYYY format"),
+        .describe(
+          "The person's date of birth, useful for age calculation or birthday reminders. Always store in DD/MM/YYYY format"
+        ),
       occupation: z
         .string()
         .optional()
@@ -56,20 +86,28 @@ const createNewUser = tool(
       last_called: z
         .string()
         .optional()
-        .describe("The last time you called or spoke to this person, used for engagement tracking. Always store in DD/MM/YYYY hh:mm:ss A format")
+        .describe(
+          "The last time you called or spoke to this person, used for engagement tracking. Always store in DD/MM/YYYY hh:mm:ss A format"
+        )
         .optional(),
       last_met: z
         .string()
         .optional()
-        .describe("The most recent in-person meeting date with this person. Always store in DD/MM/YYYY hh:mm:ss A format"),
+        .describe(
+          "The most recent in-person meeting date with this person. Always store in DD/MM/YYYY hh:mm:ss A format"
+        ),
       is_favorite: z
         .string()
         .optional()
-        .describe("Boolean flag indicating whether this person is marked as a favorite (true or false)."),
+        .describe(
+          "Boolean flag indicating whether this person is marked as a favorite (true or false)."
+        ),
       profile_photo_urls: z
         .string()
         .optional()
-        .describe("URL pointing to the person's profile picture or stored image."),
+        .describe(
+          "URL pointing to the person's profile picture or stored image."
+        ),
     }),
   }
 );

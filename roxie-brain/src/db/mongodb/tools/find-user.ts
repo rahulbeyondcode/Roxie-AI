@@ -14,41 +14,52 @@ type PropType = {
   last_met?: string;
   is_favorite?: boolean;
   profile_photo_urls?: string;
-}
+};
 
 const findUsers = tool(
   async (input: PropType) => {
-    console.log('🛠️  Find Users: ', input);
+    console.log("🛠️  Find Users: ", input);
     let usersList = [];
 
     if (input?.name) {
-      const user = await User.find({ name: { $regex: input?.name?.toLowerCase(), $options: "i" } })
-      usersList?.push(user)
+      const user = await User.find({
+        name: { $regex: input?.name?.toLowerCase(), $options: "i" },
+      });
+      usersList?.push(user);
     } else if (input?.location) {
-      const user = await User.find({ location: { $regex: input?.location?.toLowerCase(), $options: "i" } })
-      usersList?.push(user)
+      const user = await User.find({
+        location: { $regex: input?.location?.toLowerCase(), $options: "i" },
+      });
+      usersList?.push(user);
     } else if (input?.relation) {
-      const user = await User.find({ relation: { $regex: input?.relation?.toLowerCase(), $options: "i" } })
-      usersList?.push(user)
+      const user = await User.find({
+        relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
+      });
+      usersList?.push(user);
     } else if (input?.phone_number) {
-      const user = await User.find({ phone_number: input?.phone_number })
-      usersList?.push(user)
+      const user = await User.find({ phone_number: input?.phone_number });
+      usersList?.push(user);
     } else if (input?.date_of_birth) {
-      const user = await User.find({ date_of_birth: { $regex: input?.date_of_birth?.toLowerCase(), $options: "i" } })
-      usersList?.push(user)
+      const user = await User.find({
+        date_of_birth: {
+          $regex: input?.date_of_birth?.toLowerCase(),
+          $options: "i",
+        },
+      });
+      usersList?.push(user);
     } else if (input?.occupation) {
-      const user = await User.find({ occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" } })
-      usersList?.push(
-
-      )
+      const user = await User.find({
+        occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" },
+      });
+      usersList?.push();
     } else if (input?.is_favorite) {
-      const user = await User.find({ is_favorite: input?.is_favorite })
-      usersList?.push(user)
+      const user = await User.find({ is_favorite: input?.is_favorite });
+      usersList?.push(user);
     }
 
-    console.log('usersList: ', usersList);
+    console.log("usersList: ", usersList);
     // const user = await User.create(input);
-    return JSON.stringify(usersList)
+    return JSON.stringify(usersList);
   },
   {
     name: "findUser",
@@ -64,7 +75,27 @@ const findUsers = tool(
         .optional()
         .describe("The city or general location to search in db."),
       relation: z
-        .enum(['father', 'mother', 'sister', 'wife', 'uncle', 'aunt', 'cousin', 'grandfather', 'father-in-law', 'mother-in-law', 'brother-in-law', 'sister-in-law', 'friend', 'bestfriend', 'colleague', 'classmate', 'neighbor', 'mentor', 'teacher'])
+        .enum([
+          "father",
+          "mother",
+          "sister",
+          "wife",
+          "uncle",
+          "aunt",
+          "cousin",
+          "grandfather",
+          "father-in-law",
+          "mother-in-law",
+          "brother-in-law",
+          "sister-in-law",
+          "friend",
+          "bestfriend",
+          "colleague",
+          "classmate",
+          "neighbor",
+          "mentor",
+          "teacher",
+        ])
         .optional()
         .describe("The type of relationship with the person to be searched"),
       phone_number: z
@@ -74,7 +105,9 @@ const findUsers = tool(
       date_of_birth: z
         .string()
         .optional()
-        .describe("The person's date of birth in DD/MM/YYYY format for searching"),
+        .describe(
+          "The person's date of birth in DD/MM/YYYY format for searching"
+        ),
       occupation: z
         .string()
         .optional()
@@ -82,7 +115,9 @@ const findUsers = tool(
       is_favorite: z
         .string()
         .optional()
-        .describe("Boolean flag indicating whether this person is marked as a favorite (true or false)."),
+        .describe(
+          "Boolean flag indicating whether this person is marked as a favorite (true or false)."
+        ),
     }),
   }
 );

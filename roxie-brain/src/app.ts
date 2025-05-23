@@ -7,7 +7,11 @@ import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 
 import "./db";
-import { AGENT_BACKEND_PORT, AI_MODEL_NAME, SYSTEM_PROMPT } from "./helpers/config";
+import {
+  AGENT_BACKEND_PORT,
+  AI_MODEL_NAME,
+  SYSTEM_PROMPT,
+} from "./helpers/config";
 import { generateRandomString } from "./helpers/utils";
 import { tools } from "./tools";
 
@@ -76,4 +80,4 @@ router.post("/ask", async (req: Request, res: Response) => {
 
 app.use("/api", router);
 
-app.listen(AGENT_BACKEND_PORT, () => { });
+app.listen(AGENT_BACKEND_PORT, () => {});
