@@ -1,8 +1,8 @@
-roxie-agent/node_modules
-roxie-agent/dist
+roxie-brain/node_modules
+roxie-brain/dist
 
-roxie-agent/db_qdrant_data
-roxie-agent/db_mongo_data
+roxie-brain/db_qdrant_data
+roxie-brain/db_mongo_data
 
 roxie-web-ui/node_modules
 

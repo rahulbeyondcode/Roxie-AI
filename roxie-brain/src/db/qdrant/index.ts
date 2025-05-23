@@ -1,4 +1,4 @@
-import { QdrantDB } from "../../db";
+import { QdrantDB } from "..";
 
 // await QdrantDB.createCollection("test_collection", {
 //   vectors: { size: 4, distance: "Dot" },
