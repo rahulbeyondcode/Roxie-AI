@@ -71,7 +71,7 @@ router.post("/ask", async (req: Request, res: Response) => {
     console.log(`🤖 -> ${result?.messages.at(-1)?.content}`);
     console.log("\n");
 
-    res.json({ response: `🤖 -> ${result?.messages.at(-1)?.content}` });
+    res.json({ message: `${result?.messages.at(-1)?.content}` });
   } catch (err) {
     console.log("err: ", err);
     res.status(500).send({ error: "Error interacting with the model" });
