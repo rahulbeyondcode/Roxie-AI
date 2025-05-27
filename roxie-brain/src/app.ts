@@ -2,6 +2,7 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
+// import { ChatOllama } from "@langchain/ollama";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
@@ -27,6 +28,11 @@ const AIModel = new ChatGoogleGenerativeAI({
   model: AI_MODEL_NAME,
   temperature: 0.7,
 });
+
+// const AIModel = new ChatOllama({
+//   model: AI_MODEL_NAME,
+//   temperature: 0.7,
+// });
 
 const checkpointSaver = new MemorySaver();
 

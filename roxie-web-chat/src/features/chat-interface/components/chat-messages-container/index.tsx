@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
+import Markdown from "react-markdown";
+
 import Spinner from "../../../../assets/components/Spinner";
 import roxieImage from "../../../../assets/images/Roxie_no_bg.png";
 import userIcon from "../../../../assets/images/user-icon.svg";
@@ -11,7 +13,9 @@ const AssistantMessage = ({ message }: { message: string }) => {
         <img src={roxieImage} alt="assistant_image" height={20} width={20} />
       </div>
       <div className="max-w-3/4 mx-2 px-4 py-2 rounded-lg backdrop-opacity-75">
-        <p>{message}</p>
+        <p className="llm_message">
+          <Markdown>{message}</Markdown>
+        </p>
       </div>
     </div>
   );
