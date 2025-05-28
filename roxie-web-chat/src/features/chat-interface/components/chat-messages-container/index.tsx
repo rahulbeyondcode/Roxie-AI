@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import Markdown from "react-markdown";
 
-import Spinner from "../../../../assets/components/Spinner";
 import roxieImage from "../../../../assets/images/Roxie_no_bg.png";
 import userIcon from "../../../../assets/images/user-icon.svg";
 import useMessageStore from "../../store";
@@ -12,10 +11,8 @@ const AssistantMessage = ({ message }: { message: string }) => {
       <div className="bg-black mt-2 rounded-full w-[25px] h-[25px] overflow-hidden">
         <img src={roxieImage} alt="assistant_image" height={20} width={20} />
       </div>
-      <div className="max-w-3/4 mx-2 px-4 py-2 rounded-lg backdrop-opacity-75">
-        <p className="llm_message">
-          <Markdown>{message}</Markdown>
-        </p>
+      <div className="max-w-3/4 mx-2 px-4 py-2 rounded-lg backdrop-opacity-75 llm_message">
+        <Markdown>{message}</Markdown>
       </div>
     </div>
   );
@@ -38,7 +35,6 @@ const HumanMessage = ({ message }: { message: string }) => {
 const ChatMessagesContainer = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const allMessages = useMessageStore((state) => state.allMessages);
-  const isSendingMessage = useMessageStore((state) => state.isSendingMessage);
 
   console.log("allMessages: ", allMessages);
 
@@ -51,7 +47,7 @@ const ChatMessagesContainer = () => {
   }, [allMessages, scrollToBottom]);
 
   return (
-    <div className="h-full flex flex-col py-4 overflow-y-auto">
+    <div className="h-full relative flex flex-col py-4 overflow-y-auto">
       {(allMessages || [])?.map((msgObject) => {
         if (msgObject?.messageType === "llm") {
           return (
@@ -66,14 +62,7 @@ const ChatMessagesContainer = () => {
         );
       })}
 
-      {isSendingMessage ? (
-        <div className="self-center flex justify-center items-center mt-10">
-          <Spinner />
-        </div>
-      ) : (
-        ""
-      )}
-      <div ref={messagesEndRef} />
+      <div className="relative bottom-[0]" ref={messagesEndRef} />
     </div>
   );
 };

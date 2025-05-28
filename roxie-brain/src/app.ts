@@ -53,8 +53,9 @@ router.post("/ask", async (req: Request, res: Response) => {
 
   console.log(`🧑‍💻-> ${query}`);
 
-  if (!query) {
-    res.status(500).send({ reply: "Please make sure to enter your query" });
+  if (!query.trim()) {
+    res.status(500).send({ message: "Please make sure to enter your query" });
+    return;
   }
   try {
     if (isInitialLLMCall) {

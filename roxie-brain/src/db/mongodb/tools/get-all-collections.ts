@@ -6,6 +6,7 @@ const getAllCollections = tool(
   async () => {
     console.log("🛠️  Get all collections");
     const allCollections = await CollectionNames.find();
+    console.log("allCollections: ", allCollections);
     return JSON.stringify(allCollections);
   },
   {

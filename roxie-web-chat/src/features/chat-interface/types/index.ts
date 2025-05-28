@@ -6,6 +6,7 @@ type Message = {
 };
 
 export type MessageStoreType = {
+  sessionId: string;
   allMessages: Message[];
   isSendingMessage: boolean;
   sendNewMessage: (message: SendMessagePayloadType) => void;

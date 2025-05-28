@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-p.llm_message * {
+div.llm_message * {
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;

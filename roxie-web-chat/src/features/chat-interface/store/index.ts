@@ -4,6 +4,7 @@ import { sendMessageAPI } from "../api";
 import type { MessageStoreType } from "../types";
 
 const useMessageStore = create<MessageStoreType>((set) => ({
+  sessionId: generateRandomString(5),
   isSendingMessage: false,
   allMessages: [],
   sendNewMessage: async (apiPayload) => {

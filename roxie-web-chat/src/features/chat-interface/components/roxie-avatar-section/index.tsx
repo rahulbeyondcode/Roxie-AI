@@ -1,4 +1,4 @@
-import roxieImage from "../../../assets/images/Roxie_no_bg.png";
+import roxieImage from "../../../../assets/images/Roxie_no_bg.png";
 
 const RoxieAvatar = () => {
   return (
