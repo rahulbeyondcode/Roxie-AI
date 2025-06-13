@@ -142,13 +142,33 @@ export const TasksTodoSchema = new mongoose.Schema({
 });
 
 export const GrocerySchema = new mongoose.Schema({
-  item_name: {
+  name: {
     type: String,
     required: true,
   },
   quantity: {
     type: String,
     required: true,
+  },
+  is_urgent: {
+    type: Boolean,
+    required: true,
+  },
+  notes: {
+    type: String,
+    required: false,
+  },
+  added_on: {
+    type: String,
+    required: false,
+  },
+  reminder_time: {
+    type: String,
+    required: false,
+  },
+  category: {
+    type: String,
+    required: false,
   },
 });
 

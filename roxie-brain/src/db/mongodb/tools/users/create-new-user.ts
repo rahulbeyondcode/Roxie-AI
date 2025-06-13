@@ -1,23 +1,10 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { User } from "../models";
-
-type PropType = {
-  name: string;
-  location?: string;
-  relation: string;
-  notes?: string;
-  phone_number?: number;
-  date_of_birth?: string;
-  occupation?: string;
-  last_called?: string;
-  last_met?: string;
-  is_favorite?: boolean;
-  profile_photo_urls?: string;
-};
+import { User } from "../../models";
+import { CreateOrListToolInputType } from "./types";
 
 const createNewUser = tool(
-  async (input: PropType) => {
+  async (input: CreateOrListToolInputType) => {
     console.log("🛠️  Create new User: ", input);
     const user = await User.create(input);
     return user;

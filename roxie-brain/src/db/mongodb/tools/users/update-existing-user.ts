@@ -1,60 +1,33 @@
 import { tool } from "@langchain/core/tools";
-import mongoose from "mongoose";
 import { z } from "zod";
-import { User } from "../models";
-
-type UserObject = {
-  _id?: mongoose.Types.ObjectId;
-  name: string;
-  location?: string;
-  relation: string;
-  notes?: string;
-  phone_number?: number;
-  date_of_birth?: string;
-  occupation?: string;
-  last_called?: string;
-  last_met?: string;
-  is_favorite?: boolean;
-  profile_photo_urls?: string;
-};
-
-type UpdatePropType = {
-  find_props: {
-    name: string;
-    location?: string;
-    relation: string;
-    phone_number?: number;
-    date_of_birth?: string;
-    occupation?: string;
-    is_favorite?: boolean;
-  };
-} & UserObject;
+import { User } from "../../models";
+import { EditUserToolInputType, UserType } from "./types";
 
 const updateExistingUser = tool(
-  async (payload: UpdatePropType) => {
+  async (payload: EditUserToolInputType) => {
     console.log("🛠️  Update existing user: ", payload);
 
     const input = payload.find_props;
-    let usersList = [] as UserObject[];
+    let usersList = [] as UserType[];
 
     if (input?.name) {
       const user = await User.find({
         name: { $regex: input?.name?.toLowerCase(), $options: "i" },
       });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.location) {
       const user = await User.find({
         location: { $regex: input?.location?.toLowerCase(), $options: "i" },
       });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.relation) {
       const user = await User.find({
         relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
       });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.phone_number) {
       const user = await User.find({ phone_number: input?.phone_number });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.date_of_birth) {
       const user = await User.find({
         date_of_birth: {
@@ -62,15 +35,15 @@ const updateExistingUser = tool(
           $options: "i",
         },
       });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.occupation) {
       const user = await User.find({
         occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" },
       });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     } else if (input?.is_favorite) {
       const user = await User.find({ is_favorite: input?.is_favorite });
-      usersList = user as UserObject[];
+      usersList = user as UserType[];
     }
 
     if (usersList.length === 0) {

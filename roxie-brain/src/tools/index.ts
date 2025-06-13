@@ -3,14 +3,7 @@ import * as qdrantTools from "../db/qdrant/tools";
 
 import getCurrentDateTime from "./getCurrentDateTime";
 
-const { createNewUser, findUsers, getAllCollections, updateExistingUser } =
-  mongoDBTools;
+const { userTools, groceryTools } = mongoDBTools;
 const {} = qdrantTools;
 
-export const tools = [
-  getAllCollections,
-  createNewUser,
-  updateExistingUser,
-  findUsers,
-  getCurrentDateTime,
-];
+export const tools = [getCurrentDateTime, ...userTools, ...groceryTools];
