@@ -4,7 +4,7 @@ import ChatMessagesContainer from "./components/chat-messages-container";
 
 const ChatInterface = () => {
   return (
-    <div className="max-h-full chat-card w-[95%] sm:w-5/6 lg:w-1/2 my-10 rounded-xl flex flex-col">
+    <div className="max-h-full chat-card w-[95%] sm:w-5/6 lg:w-1/2 my-10 rounded-[35px] flex flex-col">
       {/* <RoxieAvatar /> */}
       <ChatMessagesContainer />
       <ChatInputSection />

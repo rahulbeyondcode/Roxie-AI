@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import LoadingAnimation from "./assets/components/Loading";
+import WaveDown from "./assets/components/WaveDown";
+import WaveUp from "./assets/components/WaveUp";
 import ChatInterface from "./features/chat-interface";
 import { generateRandomBetween } from "./helpers/utils";
 import "./styles/general.css";
@@ -19,8 +21,12 @@ function App() {
   }, []);
 
   return (
-    <div className="flex justify-center h-full bg-[url(./assets/images/background_image.jpg)] bg-center bg-cover">
-      {showLoader ? <LoadingAnimation /> : <ChatInterface />}
+    <div className="h-full relative">
+      <WaveDown startColor="#505285" stopColor="#b5aee4" />
+      <div className="flex justify-center h-full z-5 relative">
+        {showLoader ? <LoadingAnimation /> : <ChatInterface />}
+      </div>
+      <WaveUp startColor="#505285" stopColor="#b5aee4" />
     </div>
   );
 }

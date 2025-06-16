@@ -37,6 +37,10 @@ const ChatInputSection = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    textAreaRef.current!.style.height = "auto"; // reset first
+    textAreaRef.current!.style.height =
+      Math.min(textAreaRef.current!.scrollHeight, 120) + "px";
+
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
@@ -44,15 +48,15 @@ const ChatInputSection = () => {
   };
 
   return (
-    <div className="h-35 px-7 pb-3 flex items-center">
+    <div className="h-35 px-7 pb-6 flex items-center bg-resd-400">
       <textarea
         spellCheck={false}
         ref={textAreaRef}
         disabled={isSendingMessage}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder="Type your query here..."
-        className={`h-full grow rounded-lg py-2 px-3 outline-0 mr-2 ${
+        placeholder="Ask something here..."
+        className={`max-h-[120px] overflow-auto resize-none grow rounded-3xl px-4 pt-3 min outline-0 mr-2 ${
           isSendingMessage
             ? "cursor-not-allowed backdrop-opacity-15"
             : "backdrop-opacity-45"
@@ -65,7 +69,7 @@ const ChatInputSection = () => {
           </button>
         ) : (
           <button
-            className="rounded-full h-[45px] w-[45px] flex justify-center items-center cursor-pointer backdrop-opacity-35"
+            className="rounded-[47px] bg-[linear-gradient(145deg,_#f3f5ff,_#cccedd)] shadow-[5px_5px_6px_#81838c,-5px_-5px_6px_#ffffff] px-6 py-2 h-[45px] w-[45px] flex justify-center items-center cursor-pointer backdrop-opacity-35"
             onClick={handleSendMessage}
           >
             <img
