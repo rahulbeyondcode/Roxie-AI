@@ -4,10 +4,13 @@ import { CollectionNames } from "../models";
 
 const getAllCollections = tool(
   async () => {
-    console.log("🛠️  Get all collections");
-    const allCollections = await CollectionNames.find();
-    console.log("allCollections: ", allCollections);
-    return JSON.stringify(allCollections);
+    try {
+      console.log("🛠️  Get all collections");
+      const allCollections = await CollectionNames.find();
+      return JSON.stringify(allCollections);
+    } catch (err) {
+      console.log("Something went wrong: ", err);
+    }
   },
   {
     name: "getAllCollections",

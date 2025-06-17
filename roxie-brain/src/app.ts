@@ -59,32 +59,61 @@ router.post("/ask", async (req: Request, res: Response) => {
   }
   try {
     if (isInitialLLMCall) {
-      result = await agent.invoke(
-        {
-          messages: [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(query)],
-        },
-        { configurable: { thread_id } }
-      );
-      isInitialLLMCall = false;
+      try {
+        result = await agent.invoke(
+          {
+            messages: [
+              new SystemMessage(SYSTEM_PROMPT),
+              new HumanMessage(query),
+            ],
+          },
+          { configurable: { thread_id } }
+        );
+        isInitialLLMCall = false;
+      } catch (error) {
+        res.status(500).send({
+          message: "Roxie's brain froze up for some reason. Please try again",
+          error,
+        });
+        return;
+      }
     } else {
-      result = await agent.invoke(
-        {
-          messages: [new HumanMessage(query)],
-        },
-        { configurable: { thread_id } }
-      );
+      try {
+        result = await agent.invoke(
+          {
+            messages: [new HumanMessage(query)],
+          },
+          { configurable: { thread_id } }
+        );
+      } catch (error) {
+        res.status(500).send({
+          message: "Roxie's brain froze up for some reason. Please try again",
+          error,
+        });
+        return;
+      }
     }
 
     console.log(`🤖 -> ${result?.messages.at(-1)?.content}`);
     console.log("\n");
 
     res.json({ message: `${result?.messages.at(-1)?.content}` });
-  } catch (err) {
-    console.log("err: ", err);
+  } catch (error) {
+    console.log("AI error: ", error);
     res.status(500).send({ error: "Error interacting with the model" });
   }
 });
 
 app.use("/api", router);
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("🧨 Unhandled Rejection:", reason);
+  // optional: log to a monitoring service
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("🔥 Uncaught Exception:", err);
+  // optional: clean up or notify
+});
 
 app.listen(AGENT_BACKEND_PORT, () => {});

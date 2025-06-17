@@ -5,7 +5,7 @@ import { FindGroceryPropsType } from "./types";
 
 const listGrocery = tool(
   async (input: FindGroceryPropsType) => {
-    console.log("🔍 Find Grocery Item with filters:", input);
+    console.log("☠️ Delete Grocery Item:", input);
 
     const query: any = {};
 

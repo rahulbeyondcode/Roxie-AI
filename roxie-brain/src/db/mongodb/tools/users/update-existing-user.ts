@@ -11,39 +11,70 @@ const updateExistingUser = tool(
     let usersList = [] as UserType[];
 
     if (input?.name) {
-      const user = await User.find({
-        name: { $regex: input?.name?.toLowerCase(), $options: "i" },
-      });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({
+          name: { $regex: input?.name?.toLowerCase(), $options: "i" },
+        });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.location) {
-      const user = await User.find({
-        location: { $regex: input?.location?.toLowerCase(), $options: "i" },
-      });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({
+          location: { $regex: input?.location?.toLowerCase(), $options: "i" },
+        });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.relation) {
-      const user = await User.find({
-        relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
-      });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({
+          relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
+        });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.phone_number) {
-      const user = await User.find({ phone_number: input?.phone_number });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({ phone_number: input?.phone_number });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.date_of_birth) {
-      const user = await User.find({
-        date_of_birth: {
-          $regex: input?.date_of_birth?.toLowerCase(),
-          $options: "i",
-        },
-      });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({
+          date_of_birth: {
+            $regex: input?.date_of_birth?.toLowerCase(),
+            $options: "i",
+          },
+        });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.occupation) {
-      const user = await User.find({
-        occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" },
-      });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({
+          occupation: {
+            $regex: input?.occupation?.toLowerCase(),
+            $options: "i",
+          },
+        });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.is_favorite) {
-      const user = await User.find({ is_favorite: input?.is_favorite });
-      usersList = user as UserType[];
+      try {
+        const user = await User.find({ is_favorite: input?.is_favorite });
+        usersList = user as UserType[];
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     }
 
     if (usersList.length === 0) {
@@ -54,11 +85,19 @@ const updateExistingUser = tool(
       const updatedPayload = { ...payload } as any;
       delete updatedPayload.find_props;
 
-      const updatedUser = await User.findByIdAndUpdate(userId, updatedPayload, {
-        new: true,
-      });
+      try {
+        const updatedUser = await User.findByIdAndUpdate(
+          userId,
+          updatedPayload,
+          {
+            new: true,
+          }
+        );
 
-      return `Done. Updated user fetched from DB: ${JSON.stringify(updatedUser)}`;
+        return `Done. Updated user fetched from DB: ${JSON.stringify(updatedUser)}`;
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     }
     if (usersList.length > 1) {
       return `Multiple users found. Help to identify. Users: ${JSON.stringify(usersList)}`;

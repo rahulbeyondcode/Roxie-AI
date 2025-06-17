@@ -6,24 +6,28 @@ import { CreateOrListToolInputType } from "./types";
 const createNewGrocery = tool(
   async (input: CreateOrListToolInputType) => {
     console.log("🛠️  Create new Grocery Item: ", input);
-    const grocery = await Grocery.create(input);
-    console.log("created: ", grocery);
-    return grocery;
+    try {
+      const grocery = await Grocery.create(input);
+      console.log("grocery: ", grocery);
+      return grocery;
+    } catch (err) {
+      console.log("Something went wrong: ", err);
+    }
   },
   {
     name: "addNewGroceryItem",
     description:
-      "Use this tool to add a **new grocery item** to the grocery list or database. The item can be something you need to buy soon or something you regularly stock. You can specify the item name, quantity, category (e.g., vegetables, dairy), urgency, and an optional reminder time to make the list smarter and more useful. Use it whenever a user says they need to buy or remember an item.",
+      "Use this tool to add a **new grocery item** to the grocery list or database. The item can be something you need to buy soon or something you regularly stock. You can specify the item name, quantity, category (example: vegetables, dairy etc), urgency, and an optional reminder time to make the list smarter and more useful. Use it whenever a user says they need to buy or remember an item. Remember before inputting the tool, ask for fields that are missing or you don't have. **Always summarise and ask the user before using this tool**",
 
     schema: z.object({
-      item_name: z
+      name: z
         .string()
-        .describe("Name of the grocery item (e.g., eggs, milk, rice)"),
+        .describe("Name of the grocery item (example: eggs, milk, rice)"),
       quantity: z
         .string()
         .optional()
         .describe(
-          "How much of the item is needed (e.g., 1kg, 2 packs, 3 bottles)"
+          "How much of the item is needed (example: 1kg, 2 packs, 3 bottles etc)"
         ),
       category: z
         .enum([

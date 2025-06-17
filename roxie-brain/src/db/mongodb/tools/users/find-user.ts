@@ -9,43 +9,73 @@ const findUsers = tool(
     let usersList = [];
 
     if (input?.name) {
-      const user = await User.find({
-        name: { $regex: input?.name?.toLowerCase(), $options: "i" },
-      });
-      usersList?.push(user);
+      try {
+        const user = await User.find({
+          name: { $regex: input?.name?.toLowerCase(), $options: "i" },
+        });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.location) {
-      const user = await User.find({
-        location: { $regex: input?.location?.toLowerCase(), $options: "i" },
-      });
-      usersList?.push(user);
+      try {
+        const user = await User.find({
+          location: { $regex: input?.location?.toLowerCase(), $options: "i" },
+        });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.relation) {
-      const user = await User.find({
-        relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
-      });
-      usersList?.push(user);
+      try {
+        const user = await User.find({
+          relation: { $regex: input?.relation?.toLowerCase(), $options: "i" },
+        });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.phone_number) {
-      const user = await User.find({ phone_number: input?.phone_number });
-      usersList?.push(user);
+      try {
+        const user = await User.find({ phone_number: input?.phone_number });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.date_of_birth) {
-      const user = await User.find({
-        date_of_birth: {
-          $regex: input?.date_of_birth?.toLowerCase(),
-          $options: "i",
-        },
-      });
-      usersList?.push(user);
+      try {
+        const user = await User.find({
+          date_of_birth: {
+            $regex: input?.date_of_birth?.toLowerCase(),
+            $options: "i",
+          },
+        });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.occupation) {
-      const user = await User.find({
-        occupation: { $regex: input?.occupation?.toLowerCase(), $options: "i" },
-      });
-      usersList?.push();
+      try {
+        const user = await User.find({
+          occupation: {
+            $regex: input?.occupation?.toLowerCase(),
+            $options: "i",
+          },
+        });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     } else if (input?.is_favorite) {
-      const user = await User.find({ is_favorite: input?.is_favorite });
-      usersList?.push(user);
+      try {
+        const user = await User.find({ is_favorite: input?.is_favorite });
+        usersList?.push(user);
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     }
 
     console.log("usersList: ", usersList);
-    // const user = await User.create(input);
     return JSON.stringify(usersList);
   },
   {

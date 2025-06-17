@@ -145,6 +145,7 @@ export const GrocerySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    lowercase: true,
   },
   quantity: {
     type: String,

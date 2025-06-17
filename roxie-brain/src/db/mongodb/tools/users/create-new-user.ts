@@ -5,9 +5,13 @@ import { CreateOrListToolInputType } from "./types";
 
 const createNewUser = tool(
   async (input: CreateOrListToolInputType) => {
-    console.log("🛠️  Create new User: ", input);
-    const user = await User.create(input);
-    return user;
+    try {
+      console.log("🛠️  Create new User: ", input);
+      const user = await User.create(input);
+      return user;
+    } catch (err) {
+      console.log("Something went wrong: ", err);
+    }
   },
   {
     name: "createNewUser",

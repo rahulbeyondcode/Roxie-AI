@@ -22,10 +22,12 @@ const updateExistingGrocery = tool(
       query.is_urgent = input.is_urgent;
     }
 
-    const grocery = await Grocery.find(query);
-    groceriesList = grocery as GroceryType[];
-
-    console.log("Edit groceriesList: ", groceriesList);
+    try {
+      const grocery = await Grocery.find(query);
+      groceriesList = grocery as GroceryType[];
+    } catch (err) {
+      console.log("Something went wrong: ", err);
+    }
 
     if (groceriesList?.length === 0) {
       return "No grocery item matched.";
@@ -35,15 +37,19 @@ const updateExistingGrocery = tool(
       const updatedPayload = { ...payload } as any;
       delete updatedPayload.find_props;
 
-      const updatedGrocery = await Grocery.findByIdAndUpdate(
-        groceryId,
-        updatedPayload,
-        {
-          new: true,
-        }
-      );
+      try {
+        const updatedGrocery = await Grocery.findByIdAndUpdate(
+          groceryId,
+          updatedPayload,
+          {
+            new: true,
+          }
+        );
 
-      return `Done. Updated Grocery fetched from DB: ${JSON.stringify(updatedGrocery)}`;
+        return `Done. Updated Grocery fetched from DB: ${JSON.stringify(updatedGrocery)}`;
+      } catch (err) {
+        console.log("Something went wrong: ", err);
+      }
     }
     if (groceriesList?.length > 1) {
       return `Multiple Grocery items found. Help to identify. Groceries: ${JSON.stringify(groceriesList)}`;
