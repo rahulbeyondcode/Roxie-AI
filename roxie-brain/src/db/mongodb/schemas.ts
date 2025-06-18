@@ -147,13 +147,17 @@ export const GrocerySchema = new mongoose.Schema({
     required: true,
     lowercase: true,
   },
-  quantity: {
+  category: {
     type: String,
     required: true,
   },
+  quantity: {
+    type: String,
+    required: false,
+  },
   is_urgent: {
     type: Boolean,
-    required: true,
+    required: false,
   },
   notes: {
     type: String,
@@ -164,10 +168,6 @@ export const GrocerySchema = new mongoose.Schema({
     required: false,
   },
   reminder_time: {
-    type: String,
-    required: false,
-  },
-  category: {
     type: String,
     required: false,
   },

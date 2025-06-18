@@ -17,7 +17,7 @@ const createNewGrocery = tool(
   {
     name: "addNewGroceryItem",
     description:
-      "Use this tool to add a **new grocery item** to the grocery list or database. The item can be something you need to buy soon or something you regularly stock. You can specify the item name, quantity, category (example: vegetables, dairy etc), urgency, and an optional reminder time to make the list smarter and more useful. Use it whenever a user says they need to buy or remember an item. Remember before inputting the tool, ask for fields that are missing or you don't have. **Always summarise and ask the user before using this tool**",
+      "Use this tool to add a new grocery item to the list or database. It's for items the user needs soon or regularly buys. You must have the item's name, category and any other available fields like quantity, urgency, or reminder time. You must always auto infer categories if not explicitly specified by the user and must seek confirmation from user. If any field is missing, you must ask the user first. Always summarise and confirm with the user before calling this tool. Never call this tool before summarising and getting exlicit permission from user to add the item",
 
     schema: z.object({
       name: z

@@ -56,7 +56,7 @@ const ChatInputSection = () => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder="Ask something here..."
-        className={`scroll-container chat-card max-h-[120px] overflow-auto resize-none grow rounded-3xl px-4 pt-3 min outline-0 mr-2 ${
+        className={`scroll-container bg-[#b2ade3] opacity-85 max-h-[120px] overflow-auto resize-none grow rounded-xl px-4 pt-3 min outline-0 mr-2 ${
           isSendingMessage
             ? "cursor-not-allowed backdrop-opacity-15"
             : "backdrop-opacity-45"
@@ -69,7 +69,7 @@ const ChatInputSection = () => {
           </button>
         ) : (
           <button
-            className="rounded-[47px] chat-card h-[45px] w-[45px] flex justify-center items-center cursor-pointer backdrop-opacity-35"
+            className="rounded-xl bg-[#b2ade3] opacity-85 h-[45px] w-[45px] flex justify-center items-center cursor-pointer backdrop-opacity-35"
             onClick={handleSendMessage}
           >
             <img
