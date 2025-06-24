@@ -3,9 +3,9 @@ import { z } from "zod";
 import { Grocery } from "../../models";
 import { FindGroceryPropsType } from "./types";
 
-const listGrocery = tool(
+const deleteGrocery = tool(
   async (input: FindGroceryPropsType) => {
-    console.log("☠️ Delete Grocery Item:", input);
+    console.log("🗑️ Delete Grocery Item(s):", input);
 
     const query: any = {};
 
@@ -26,23 +26,25 @@ const listGrocery = tool(
     }
 
     try {
-      const groceries = await Grocery.find(query);
-
-      console.log("List groceries: ", groceries);
-
-      if (!groceries?.length) {
-        return "No grocery items matched your search.";
+      console.log("query: ", query);
+      const result = await Grocery.deleteMany(query);
+      console.log("result: ", result);
+      console.log("---------------------------------------");
+      console.log("");
+      if (result.deletedCount === 0) {
+        return "No grocery items matched the filters. Nothing was deleted.";
       }
 
-      return `Found ${groceries?.length} item(s): ${JSON.stringify(groceries, null, 2)}`;
+      return `Successfully deleted ${result.deletedCount} grocery item(s).`;
     } catch (err) {
-      console.log("Something went wrong: ", err);
+      console.error("Error deleting groceries:", err);
+      return "Something went wrong while deleting grocery items.";
     }
   },
   {
-    name: "listGrocery",
+    name: "deleteGrocery",
     description:
-      "Use this tool to find grocery items in the list. You can filter by name, category, urgency, added date, reminder time, or use it without filters to list all groceries.",
+      "Use this tool to delete grocery items from the list. You can filter by name, category, urgency, added date, or reminder time. Be specific to avoid deleting unintended items. You must always ask confirmation before using this tool to delete",
     schema: z.object({
       name: z.string().optional().describe("Name of the grocery item."),
       category: z
@@ -78,4 +80,4 @@ const listGrocery = tool(
   }
 );
 
-export default listGrocery;
+export default deleteGrocery;
