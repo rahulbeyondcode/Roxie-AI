@@ -17,4 +17,24 @@
 }
 
 .custom-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(90, 92, 158, 0.6) transparent;
+}
+
+.custom-scroll-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(90, 92, 158, 0.6);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.custom-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(90, 92, 158, 0.85);
 }
