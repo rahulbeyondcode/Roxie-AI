@@ -47,7 +47,7 @@ const ChatMessagesContainer = () => {
   }, [allMessages, scrollToBottom]);
 
   return (
-    <div className="custom-scroll-container h-full relative flex flex-col py-4 overflow-y-auto">
+    <div className="custom-scroll-container h-full relative flex flex-col pt-8 pb-4 overflow-y-auto">
       {(allMessages || [])?.map((msgObject) => {
         if (msgObject?.messageType === "llm") {
           return (
