@@ -44,7 +44,7 @@ const agent = createReactAgent({
 
 const sessionId = generateRandomString(7);
 
-let isInitialLLMCall = false;
+let isInitialLLMCall = true;
 
 router.post("/ask", async (req: Request, res: Response) => {
   const query = req.body?.query as string;
