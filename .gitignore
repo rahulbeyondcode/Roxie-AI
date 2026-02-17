@@ -10,3 +10,4 @@ roxie-embedder/venv
 .env.docker
 
 .claude
+.pnpm-store

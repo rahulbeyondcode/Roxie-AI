@@ -13,20 +13,14 @@ const dbConfig = {
 
 export const sqlDB = new Pool(dbConfig);
 
-const initDB = async () => {
+export const initDB = async () => {
   const client = await sqlDB.connect();
 
   try {
     // pgvector extension is required for vector similarity search.
     await client.query("CREATE EXTENSION IF NOT EXISTS vector");
-    console.log("PostgreSQL connected with pgvector enabled ✅");
+    console.log("PostgreSQL connected with pgvector enabled");
   } finally {
     client.release();
   }
 };
-
-try {
-  await initDB();
-} catch (error) {
-  console.error("PostgreSQL connection error:", error);
-}

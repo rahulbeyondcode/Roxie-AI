@@ -6,7 +6,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 
-import "./db";
+import { initDB, sqlDB } from "./db";
+import { createTables } from "./db/schema";
+import { seedCategories } from "./db/seed";
 import {
   AGENT_BACKEND_PORT,
   AI_MODEL_NAME,
@@ -109,6 +111,18 @@ process.on("uncaughtException", (err) => {
   console.error("🔥 Uncaught Exception:", err);
 });
 
-app.listen(AGENT_BACKEND_PORT, () => {
-  console.log(`🚀 Roxie AI backend listening on port ${AGENT_BACKEND_PORT}`);
-});
+const startServer = async () => {
+  try {
+    await initDB();
+    await createTables(sqlDB);
+    await seedCategories(sqlDB);
+  } catch (error) {
+    console.error("Startup error:", error);
+  }
+
+  app.listen(AGENT_BACKEND_PORT, () => {
+    console.log(`Roxie AI backend listening on port ${AGENT_BACKEND_PORT}`);
+  });
+};
+
+startServer();

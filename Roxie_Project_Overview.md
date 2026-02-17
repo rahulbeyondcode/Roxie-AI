@@ -136,7 +136,7 @@ User query (vague or specific)
 CREATE TABLE categories (
   id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
-  embedding vector(1536),      -- embedding of the category name
+  embedding vector(1024),      -- embedding of the category name
   created_at TIMESTAMP DEFAULT NOW(),
   usage_count INT DEFAULT 0
 );
@@ -146,7 +146,7 @@ CREATE TABLE data_store (
   id SERIAL PRIMARY KEY,
   category_id INT REFERENCES categories(id),
   data JSONB NOT NULL,         -- flexible, schema-less per category
-  embedding vector(1536),      -- embedding of the stored content
+  embedding vector(1024),      -- embedding of the stored content
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -156,7 +156,7 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   role TEXT NOT NULL,          -- 'user' | 'assistant'
   content TEXT NOT NULL,
-  embedding vector(1536),
+  embedding vector(1024),
   created_at TIMESTAMP DEFAULT NOW()
 );
 
