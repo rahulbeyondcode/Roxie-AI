@@ -3,12 +3,15 @@ import { Pool } from "pg";
 
 dotenv.config();
 
-const POSTGRES_URL =
-  process.env.POSTGRES_URL || "postgresql://postgres:postgres@localhost:5432/roxie";
+const dbConfig = {
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  database: process.env.DB_DATABASE,
+  user: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+};
 
-export const sqlDB = new Pool({
-  connectionString: POSTGRES_URL,
-});
+export const sqlDB = new Pool(dbConfig);
 
 const initDB = async () => {
   const client = await sqlDB.connect();

@@ -1,8 +1,6 @@
 roxie-brain/node_modules
 roxie-brain/dist
-
-roxie-brain/db_qdrant_data
-roxie-brain/db_mongo_data
+roxie-brain/.env
 
 roxie-web-ui/node_modules
 
