@@ -1,8 +1,7 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
-// import { ChatOllama } from "@langchain/ollama";
+import { ChatOpenAI } from "@langchain/openai";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
@@ -24,15 +23,14 @@ const router = express.Router();
 app.use(cors());
 app.use(express.json());
 
-const AIModel = new ChatGoogleGenerativeAI({
+const AIModel = new ChatOpenAI({
   model: AI_MODEL_NAME,
   temperature: 0.7,
+  apiKey: process.env.OPENROUTER_API_KEY,
+  configuration: {
+    baseURL: process.env.OPENROUTER_BASE_URL,
+  },
 });
-
-// const AIModel = new ChatOllama({
-//   model: AI_MODEL_NAME,
-//   temperature: 0.7,
-// });
 
 const checkpointSaver = new MemorySaver();
 
@@ -40,67 +38,64 @@ const agent = createReactAgent({
   llm: AIModel,
   tools,
   checkpointSaver,
+  prompt: new SystemMessage(SYSTEM_PROMPT),
 });
-
-const sessionId = generateRandomString(7);
-
-let isInitialLLMCall = true;
 
 router.post("/ask", async (req: Request, res: Response) => {
   const query = req.body?.query as string;
-  const thread_id = req.body?.thread_id || sessionId;
-  let result;
+  const thread_id = req.body?.thread_id || generateRandomString(7);
 
   console.log(`🧑‍💻-> ${query}`);
 
-  if (!query.trim()) {
-    res.status(500).send({ message: "Please make sure to enter your query" });
+  if (!query || !query.trim()) {
+    res.status(400).send({ message: "Please provide a query" });
     return;
   }
-  try {
-    if (isInitialLLMCall) {
-      try {
-        result = await agent.invoke(
-          {
-            messages: [
-              new SystemMessage(SYSTEM_PROMPT),
-              new HumanMessage(query),
-            ],
-          },
-          { configurable: { thread_id } }
-        );
-        isInitialLLMCall = false;
-      } catch (error) {
-        res.status(500).send({
-          message: "Roxie's brain froze up for some reason. Please try again",
-          error,
-        });
-        return;
-      }
-    } else {
-      try {
-        result = await agent.invoke(
-          {
-            messages: [new HumanMessage(query)],
-          },
-          { configurable: { thread_id } }
-        );
-      } catch (error) {
-        res.status(500).send({
-          message: "Roxie's brain froze up for some reason. Please try again",
-          error,
-        });
-        return;
-      }
-    }
 
-    console.log(`🤖 -> ${result?.messages.at(-1)?.content}`);
+  try {
+    const result = await agent.invoke(
+      {
+        messages: [new HumanMessage(query)],
+      },
+      { configurable: { thread_id } }
+    );
+
+    const aiResponse = result?.messages.at(-1)?.content || "";
+
+    console.log(`🤖 -> ${aiResponse}`);
     console.log("\n");
 
-    res.json({ message: `${result?.messages.at(-1)?.content}` });
-  } catch (error) {
-    console.log("AI error: ", error);
-    res.status(500).send({ error: "Error interacting with the model" });
+    res.json({
+      message: `${aiResponse}`,
+      thread_id,
+    });
+  } catch (error: any) {
+    console.error("AI error: ", error);
+
+    if (error.response?.status === 401) {
+      res.status(401).send({
+        message:
+          "Invalid API key for OpenRouter. Please check your configuration.",
+        error: error.message,
+      });
+    } else if (error.response?.status === 429) {
+      res.status(429).send({
+        message:
+          "Rate limit exceeded for OpenRouter API. Please try again later.",
+        error: error.message,
+      });
+    } else if (error.code === "ECONNRESET" || error.code === "ENOTFOUND") {
+      res.status(503).send({
+        message:
+          "Network error connecting to OpenRouter API. Please check your connection.",
+        error: error.message,
+      });
+    } else {
+      res.status(500).send({
+        message: "Error interacting with the AI model",
+        error: error.message || "Unknown error occurred",
+      });
+    }
   }
 });
 
@@ -108,12 +103,12 @@ app.use("/api", router);
 
 process.on("unhandledRejection", (reason, promise) => {
   console.error("🧨 Unhandled Rejection:", reason);
-  // optional: log to a monitoring service
 });
 
 process.on("uncaughtException", (err) => {
   console.error("🔥 Uncaught Exception:", err);
-  // optional: clean up or notify
 });
 
-app.listen(AGENT_BACKEND_PORT, () => {});
+app.listen(AGENT_BACKEND_PORT, () => {
+  console.log(`🚀 Roxie AI backend listening on port ${AGENT_BACKEND_PORT}`);
+});
