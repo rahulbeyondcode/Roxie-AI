@@ -4,7 +4,7 @@ import { AGENT_EMBEDDING_PORT } from "./config";
 
 const fetchEmebddings = (text: string) => {
   axios
-    .post(`http://localhost:${AGENT_EMBEDDING_PORT}/embed`, {
+    .post(`http://${process.env.EMBEDDER_HOST}:${AGENT_EMBEDDING_PORT}/embed`, {
       text,
     })
     .then((res) => {

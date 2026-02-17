@@ -1,0 +1,44 @@
+# Usage: docker compose --env-file .env.docker up --build
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: roxie
+      POSTGRES_USER: roxie_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U roxie_user -d roxie"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  roxie-embedder:
+    build: ./roxie-embedder
+    ports:
+      - "5001:5001"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:5001/docs\")'"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  roxie-brain:
+    build: ./roxie-brain
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env.docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      roxie-embedder:
+        condition: service_healthy
+
+volumes:
+  pgdata:

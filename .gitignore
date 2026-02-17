@@ -6,3 +6,7 @@ roxie-web-ui/node_modules
 
 roxie-embedder/__pycache__
 roxie-embedder/venv
+
+.env.docker
+
+.claude
