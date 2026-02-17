@@ -32,8 +32,12 @@ services:
     build: ./roxie-brain
     ports:
       - "5000:5000"
+    environment:
+      TZ: Asia/Kolkata
     env_file:
       - .env.docker
+    volumes:
+      - ./roxie-brain/src:/app/src
     depends_on:
       postgres:
         condition: service_healthy

@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 5000
 
-CMD ["npx", "tsx", "src/app.ts"]
+CMD ["npx", "tsx", "watch", "src/app.ts"]

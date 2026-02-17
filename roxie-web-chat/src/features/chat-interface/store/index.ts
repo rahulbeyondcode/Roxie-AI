@@ -40,6 +40,7 @@ const useMessageStore = create<MessageStoreType>((set) => ({
       }
     } catch (err) {
       console.log("err: ", err);
+      set({ isSendingMessage: false });
     }
   },
 }));
