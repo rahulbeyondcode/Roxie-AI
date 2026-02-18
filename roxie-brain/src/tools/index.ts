@@ -4,7 +4,9 @@ import searchData from "./searchData"
 import retrieveData from "./retrieveData"
 import updateData from "./updateData"
 import deleteData from "./deleteData"
-import manageProfile from "./manageProfile"
+import setProfile from "./setProfile"
+import deleteProfile from "./deleteProfile"
+import listProfile from "./listProfile"
 
 export const tools = [
   getCurrentDateTime,
@@ -13,5 +15,7 @@ export const tools = [
   retrieveData,
   updateData,
   deleteData,
-  manageProfile,
+  setProfile,
+  deleteProfile,
+  listProfile,
 ]
