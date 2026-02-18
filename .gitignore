@@ -10,4 +10,5 @@ roxie-embedder/venv
 .env.docker
 
 .claude
+.vscode
 .pnpm-store

@@ -14,6 +14,7 @@ import {
   AI_MODEL_NAME,
   SYSTEM_PROMPT,
 } from "./helpers/config";
+import { loadUserProfile } from "./helpers/profile-loader";
 import { generateRandomString } from "./helpers/utils";
 import { tools } from "./tools";
 
@@ -40,7 +41,18 @@ const agent = createReactAgent({
   llm: AIModel,
   tools,
   checkpointSaver,
-  prompt: new SystemMessage(SYSTEM_PROMPT),
+  prompt: async () => {
+    try {
+      const profileSection = await loadUserProfile();
+      const fullPrompt = profileSection
+        ? `${SYSTEM_PROMPT}\n\n## About Your User\n\n${profileSection}`
+        : `${SYSTEM_PROMPT}\n\n## About Your User\n\nNo user profile data found. This is a new user. Follow the onboarding instructions above.`;
+      return [new SystemMessage(fullPrompt)];
+    } catch (error) {
+      console.error("Failed to load user profile:", error);
+      return [new SystemMessage(SYSTEM_PROMPT)];
+    }
+  },
 });
 
 router.post("/ask", async (req: Request, res: Response) => {

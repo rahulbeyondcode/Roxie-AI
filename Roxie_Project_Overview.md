@@ -268,13 +268,15 @@ Previous MongoDB-backed user and grocery tools were removed during DB migration 
 src/
 ├── app.ts                          # Express server entry, agent setup, /api/ask endpoint
 ├── db/
-│   └── index.ts                    # PostgreSQL pool init, pgvector extension bootstrap
+│   ├── index.ts                    # PostgreSQL pool init, pgvector extension bootstrap
+│   ├── schema.ts                   # Table creation (categories, data_store, messages) + indexes
+│   └── seed.ts                     # Default category seeding with embeddings
 ├── helpers/
-│   ├── config.ts                   # Environment config and constants
-│   ├── get-embeddings.ts           # Embedding generation utility
+│   ├── config.ts                   # Environment config, constants, system prompt
+│   ├── get-embeddings.ts           # Embedding generation utility (calls roxie-embedder)
 │   └── utils.ts                    # General utility functions
 ├── integrations/
-│   └── tavily/                     # Tavily search integration
+│   └── tavily/                     # Tavily search integration (placeholder)
 └── tools/
     ├── getCurrentDateTime.ts       # Tool: returns current date and time
     └── index.ts                    # Tool registry, exports all tools to agent
@@ -300,24 +302,87 @@ pnpm format
 - Ignore Sibling projects in the folder unless specifically asked for
 - If modules are missing locally, run `pnpm install` before proceeding.
 
-### Known Gaps (Not Yet Implemented)
-
-- `store_data`, `retrieve_data`, `update_data`, `search_data`, `set_reminder` tools are not yet built
-- Category system (embedding-based matching, `categories` table, `data_store` table) is not yet implemented
-- Multi-intent message parsing is not yet implemented
-- Voice pipeline (STT/TTS) is not yet integrated
-- Reminder/notification scheduler is not yet implemented
-
 ---
 
-## 13. Future Scope
+## 13. Project Roadmap
 
-- Migrate LLM from Gemini to local open-source model via Ollama (e.g. Llama 3 8B or Mistral 7B)
-- Migrate embedding model to fully local inference
-- React Native Android app (primary frontend target)
-- Whisper STT + Piper TTS for fully local voice pipeline
-- Enhanced personality layer for voice interaction
-- Memory visualization (mind graph) in frontend
-- Advanced scheduling (recurring tasks, smart reminders)
-- Multi-user support with per-user category namespacing
-- Periodic category deduplication tooling
+> **Maintenance rule:** Remove tasks from this list as they are completed. This file should always reflect only what remains to be done.
+
+### Phase 2: Memory & Conversation Persistence
+
+- [ ] **Message persistence** — Store every conversation message (user + assistant) in the `messages` table with embeddings. Currently messages only live in LangGraph's in-memory `MemorySaver`.
+- [ ] **Persistent conversation checkpointing** — Replace `MemorySaver` with `PostgresSaver` (or equivalent) so conversation history survives server restarts.
+- [ ] **Long-term memory retrieval** — When the LLM needs context beyond the current conversation window, semantic-search the `messages` table and inject relevant past messages into context.
+- [ ] **Short-term memory window** — Enforce a sliding window of last ~20 messages in LLM context to keep token usage manageable while maintaining conversational coherence.
+- [ ] **Memory confirmation flow** — Before storing a memory/data point, Roxie confirms with the user. Embeddings are generated only *after* confirmation, not speculatively.
+
+### Phase 3: Multi-Intent Parsing
+
+- [ ] **Multi-intent extraction** — Parse a single user message like "Buy milk, borrow shirt from Akshay for tomorrow, and get shoes from Zudio" into 3 separate intents, each independently categorized and stored.
+- [ ] **Context preservation across intents** — When splitting intents, preserve contextual information (e.g., "from Akshay" applies to the shirt, not the milk).
+- [ ] **Batch confirmation UX** — After parsing multiple intents, present all of them to the user for confirmation in a single response rather than one-by-one.
+
+### Phase 4: Reminder & Task System
+
+- [ ] **`set_reminder` tool** — Schedule a reminder with a message, due date/time, and priority level. Store in database with scheduling metadata.
+- [ ] **Reminder scheduler service** — Background process (cron or interval-based) that checks for due reminders and triggers notifications.
+- [ ] **Push notification delivery** — Send reminder notifications to the user (web push for web chat, FCM for future mobile app).
+- [ ] **Smart reminder defaults** — When no explicit due date is given, default to a low-priority reminder in 4–8 hours (with user confirmation).
+- [ ] **Priority-based scheduling** — High-priority items get more aggressive reminder timing; low-priority items are gentler.
+- [ ] **Due date extraction** — Parse natural language time references ("tomorrow", "next Monday", "in 2 hours", "end of month") into concrete timestamps.
+- [ ] **Recurring tasks** — Support repeating reminders (daily, weekly, monthly, custom intervals).
+
+### Phase 5: Web Chat Frontend Improvements
+
+- [ ] **Confirmation UI modals** — When Roxie asks for confirmation (memory storage, edits, multi-intent), show a structured modal/card instead of plain text.
+- [ ] **Session persistence** — Currently the web chat loses all messages on page refresh. Persist conversation history (either client-side or server-side via thread ID).
+- [ ] **Typing/thinking indicator** — Show a more polished indicator while Roxie is processing (currently just a spinner).
+- [ ] **Error handling UI** — Display user-friendly error states when the backend is unreachable or returns errors.
+- [ ] **Message timestamps** — Show when each message was sent/received.
+- [ ] **Chat history sidebar** — Allow browsing and resuming previous conversation threads.
+
+### Phase 6: Voice Pipeline
+
+- [ ] **Whisper STT integration** — Local speech-to-text using Whisper. Accept audio input from the frontend, transcribe, and feed to the LLM as text.
+- [ ] **Piper TTS / WhisperSpeech integration** — Local text-to-speech. Convert Roxie's text responses to audio and stream back to the frontend.
+- [ ] **Voice input endpoint** — New API endpoint (or WebSocket) that accepts audio streams/files and returns text + audio responses.
+- [ ] **Voice activity detection (VAD)** — Detect when the user starts/stops speaking for hands-free interaction.
+- [ ] **Enhanced personality layer for voice** — Tune TTS parameters (speed, tone, pauses) to match Roxie's casual personality.
+
+### Phase 7: Infrastructure & DevOps
+
+- [ ] **Docker Compose for full stack** — Single `docker-compose.yml` to spin up roxie-brain, roxie-embedder, and PostgreSQL together.
+- [ ] **API authentication** — Add basic auth or API key validation to `/api/ask` to prevent unauthorized access.
+- [ ] **Environment-based configuration** — Separate dev/prod configs, with sensible defaults and validation on startup.
+- [ ] **Health check endpoints** — `/health` on both brain and embedder services for monitoring and Docker health checks.
+- [ ] **Request logging & observability** — Structured logging for requests, tool calls, and errors. LangSmith tracing is already configured but could be extended.
+
+### Phase 8: LLM & Embedding Improvements
+
+- [ ] **Migrate to local LLM** — Replace OpenRouter API with a locally hosted model via Ollama (e.g., Llama 3 8B, Mistral 7B, or similar). Eliminates API dependency and cost.
+- [ ] **Migrate embeddings to local model** — Replace `BAAI/bge-large-en-v1.5` with a lighter local model (e.g., `Xenova/all-MiniLM-L6-v2`). Would require re-embedding all stored data and adjusting vector dimensions.
+- [ ] **LLM response quality tuning** — Evaluate and tune temperature, system prompt, and model choice for Roxie's specific use case (memory assistant vs. general chat).
+- [ ] **Fallback LLM strategy** — If the primary LLM is unavailable, gracefully degrade (queue the request, use a backup model, or inform the user).
+
+### Phase 9: Integrations
+
+- [ ] **Tavily web search tool** — Connect the already-configured Tavily API key to give Roxie the ability to search the web when her own memory doesn't have the answer.
+- [ ] **Calendar integration** — Sync with Google Calendar or similar for event-aware reminders and scheduling.
+- [ ] **Expense tracking integration** — Optional: connect with a simple expense tracker for money-related memories (money owed, spent, etc.).
+
+### Phase 10: React Native Mobile App
+
+- [ ] **React Native project setup** — Initialize the Android-first mobile app (the primary intended frontend).
+- [ ] **Voice-first interaction design** — Primary UI is a voice interface, with text chat as fallback.
+- [ ] **Push notification handling** — Receive and display reminder notifications via FCM.
+- [ ] **Offline mode** — Queue messages when offline, sync when back online.
+- [ ] **Background voice listener** — Optional always-on listening mode with wake word detection.
+
+### Phase 11: Advanced Features (Long-term)
+
+- [ ] **Memory visualization (mind graph)** — Visual graph of stored memories, categories, and connections in the frontend.
+- [ ] **Memory aggregation & summarization** — Periodically summarize old memories into higher-level summaries to reduce storage and improve retrieval.
+- [ ] **Category deduplication tooling** — Periodic process to merge semantically similar categories that have drifted apart.
+- [ ] **Multi-user support** — Per-user category namespacing, authentication, and data isolation.
+- [ ] **Smart context injection** — Proactively surface relevant memories during conversation without being asked (e.g., "By the way, you mentioned X last week").
+- [ ] **Conversation summarization** — At the end of long conversations, generate a summary and store as a memory for future reference.

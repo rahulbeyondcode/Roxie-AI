@@ -26,12 +26,13 @@ export const createTables = async (pool: Pool) => {
     `);
 
     await client.query(`
-      CREATE TABLE IF NOT EXISTS messages (
+      CREATE TABLE IF NOT EXISTS user_profile (
         id SERIAL PRIMARY KEY,
-        role VARCHAR(20) NOT NULL,
-        content TEXT NOT NULL,
-        embedding vector(1024),
-        created_at TIMESTAMP DEFAULT NOW()
+        key VARCHAR(100) NOT NULL UNIQUE,
+        value TEXT NOT NULL,
+        category VARCHAR(50) NOT NULL DEFAULT 'general',
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
       );
     `);
 
@@ -40,7 +41,6 @@ export const createTables = async (pool: Pool) => {
       CREATE INDEX IF NOT EXISTS idx_categories_embedding ON categories USING hnsw (embedding vector_cosine_ops);
       CREATE INDEX IF NOT EXISTS idx_data_store_embedding ON data_store USING hnsw (embedding vector_cosine_ops);
       CREATE INDEX IF NOT EXISTS idx_data_store_category_id ON data_store (category_id);
-      CREATE INDEX IF NOT EXISTS idx_messages_embedding ON messages USING hnsw (embedding vector_cosine_ops);
     `);
 
     console.log("Database tables created successfully");
