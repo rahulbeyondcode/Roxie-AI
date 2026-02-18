@@ -1,7 +1,7 @@
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { HumanMessage } from "@langchain/core/messages";
 import { MemorySaver } from "@langchain/langgraph";
-import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
+import { createAgent } from "langchain";
 import cors from "cors";
 import dotenv from "dotenv";
 import express, { Request, Response } from "express";
@@ -14,7 +14,6 @@ import {
   AI_MODEL_NAME,
   SYSTEM_PROMPT,
 } from "./helpers/config";
-import { loadUserProfile } from "./helpers/profile-loader";
 import { generateRandomString } from "./helpers/utils";
 import { tools } from "./tools";
 
@@ -37,22 +36,11 @@ const AIModel = new ChatOpenAI({
 
 const checkpointSaver = new MemorySaver();
 
-const agent = createReactAgent({
-  llm: AIModel,
+const agent = createAgent({
+  model: AIModel,
   tools,
-  checkpointSaver,
-  prompt: async () => {
-    try {
-      const profileSection = await loadUserProfile();
-      const fullPrompt = profileSection
-        ? `${SYSTEM_PROMPT}\n\n## About Your User\n\n${profileSection}`
-        : `${SYSTEM_PROMPT}\n\n## About Your User\n\nNo user profile data found. This is a new user. Follow the onboarding instructions above.`;
-      return [new SystemMessage(fullPrompt)];
-    } catch (error) {
-      console.error("Failed to load user profile:", error);
-      return [new SystemMessage(SYSTEM_PROMPT)];
-    }
-  },
+  checkpointer: checkpointSaver,
+  systemPrompt: SYSTEM_PROMPT,
 });
 
 router.post("/ask", async (req: Request, res: Response) => {

@@ -2,6 +2,7 @@ import { tool } from "@langchain/core/tools";
 
 const getCurrentDateTime = tool(
   async () => {
+    console.log("🕐 GetTime Tool called")
     const now = new Date();
 
     const days = [
@@ -51,6 +52,7 @@ const getCurrentDateTime = tool(
       amOrpm: ampm,
     };
 
+    console.log(`🕐 GetTime Returning: ${dayName}, ${day} ${monthName} ${year} ${hours}:${minutes}:${seconds} ${ampm}`)
     return JSON.stringify(finalPayload);
   },
   {
