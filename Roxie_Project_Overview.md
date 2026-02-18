@@ -71,6 +71,7 @@ Her primary job is to **offload Rahul's memory, planning, and mental overhead** 
 - Uses `createReactAgent` with the configured online LLM
 - Loads tools from `src/tools/index.ts`
 - Uses `MemorySaver` checkpointing with `thread_id` for short-term conversation context
+- System prompt is static (defined in `src/helpers/config.ts`). Profile management is handled via dedicated tools (`set_profile`, `list_profile`, `delete_profile`) rather than dynamic prompt injection.
 
 ### 6.2 Database
 
@@ -151,19 +152,19 @@ CREATE TABLE data_store (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
--- Conversation messages for short and long-term memory
-CREATE TABLE messages (
+-- Persistent user profile facts (always loaded into system prompt)
+CREATE TABLE user_profile (
   id SERIAL PRIMARY KEY,
-  role TEXT NOT NULL,          -- 'user' | 'assistant'
-  content TEXT NOT NULL,
-  embedding vector(1024),
-  created_at TIMESTAMP DEFAULT NOW()
+  key VARCHAR(100) NOT NULL UNIQUE,  -- e.g. 'name', 'location', 'favorite_cuisine'
+  value TEXT NOT NULL,
+  category VARCHAR(50) NOT NULL DEFAULT 'general',  -- identity, work, preferences, health, relationships, general
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE INDEX idx_category_embedding ON categories USING ivfflat (embedding vector_cosine_ops);
-CREATE INDEX idx_data_embedding ON data_store USING ivfflat (embedding vector_cosine_ops);
+CREATE INDEX idx_category_embedding ON categories USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX idx_data_embedding ON data_store USING hnsw (embedding vector_cosine_ops);
 CREATE INDEX idx_data_category ON data_store(category_id);
-CREATE INDEX idx_messages_embedding ON messages USING ivfflat (embedding vector_cosine_ops);
 ```
 
 ### 7.2 Category System
@@ -194,8 +195,8 @@ health_tracking, calendar_events, personal_notes, books_media, contacts
 
 | Layer               | Mechanism                                                                              |
 | ------------------- | -------------------------------------------------------------------------------------- |
-| **Short-term**      | Last 20 messages passed in LLM context                                                 |
-| **Long-term**       | All messages stored in `messages` table with embeddings; retrieved via semantic search |
+| **Short-term**      | In-memory `MemorySaver` checkpointing per `thread_id` (lost on server restart)         |
+| **User profile**    | `user_profile` table — always loaded into system prompt at conversation start           |
 | **Structured data** | Stored in `data_store` with category, JSONB data, and embedding                        |
 
 Embeddings are generated **only after user confirmation** for memory storage. Query embeddings are generated **on-the-fly**.
@@ -214,13 +215,25 @@ Roxie's system prompt establishes her as a **close, emotionally intelligent pers
 - Keeps responses concise unless detail is explicitly needed
 - Treats all information shared by Rahul as private and sensitive
 
+**Profile management:** The system prompt includes guidance on when to use profile tools (`set_profile` for identity-level facts) vs `store_data` (episodic/transactional items). There is no dynamic prompt injection or blocking onboarding gate — if Roxie doesn't know the user's name, she asks casually during natural conversation while still helping with whatever is needed.
+
 ---
 
 ## 9. Tooling
 
 ### 8.1 Current Registered Tools
 
-- `getCurrentDateTime` (`src/tools/getCurrentDateTime.ts`)
+All tools are registered in `src/tools/index.ts`:
+
+- `getCurrentDateTime` — Returns current date and time
+- `store_data` — Save structured intent to `data_store` after category resolution
+- `search_data` — Semantic similarity search across `data_store`
+- `retrieve_data` — Query `data_store` by category and/or filters
+- `update_data` — Modify existing entries in `data_store`
+- `delete_data` — Remove entries from `data_store`
+- `set_profile` — Store or update a persistent identity fact about the user in `user_profile`
+- `delete_profile` — Remove a stored fact from the user's profile
+- `list_profile` — List all stored facts from the user's profile
 
 ### 8.2 Tool Architecture Philosophy
 
@@ -228,12 +241,16 @@ Roxie does **not** use one tool per action or per data domain. Instead, tools ma
 
 | Tool                   | Purpose                                                              |
 | ---------------------- | -------------------------------------------------------------------- |
-| `store_data`           | Save any structured intent to `data_store` after category resolution |
-| `retrieve_data`        | Query `data_store` by category and/or filters                        |
-| `update_data`          | Modify existing entries in `data_store`                              |
-| `search_data`          | Semantic similarity search across `data_store` or `messages`         |
-| `set_reminder`         | Schedule a push notification or voice alert                          |
-| `get_current_datetime` | Utility: current date and time                                       |
+| `store_data`           | Save any structured intent to `data_store` after category resolution       |
+| `retrieve_data`        | Query `data_store` by category and/or filters                              |
+| `update_data`          | Modify existing entries in `data_store`                                    |
+| `search_data`          | Semantic similarity search across `data_store`                             |
+| `delete_data`          | Remove entries from `data_store`                                           |
+| `set_profile`          | Store or update a persistent identity fact in `user_profile`               |
+| `delete_profile`       | Remove a stored fact from the user's profile                               |
+| `list_profile`         | List all stored facts from the user's profile                              |
+| `set_reminder`         | Schedule a push notification or voice alert *(not yet implemented)*        |
+| `get_current_datetime` | Utility: current date and time                                             |
 
 Previous MongoDB-backed user and grocery tools were removed during DB migration and are **not to be reimplemented as domain-specific tools**.
 
@@ -269,16 +286,26 @@ src/
 ├── app.ts                          # Express server entry, agent setup, /api/ask endpoint
 ├── db/
 │   ├── index.ts                    # PostgreSQL pool init, pgvector extension bootstrap
-│   ├── schema.ts                   # Table creation (categories, data_store, messages) + indexes
+│   ├── schema.ts                   # Table creation (categories, data_store, user_profile) + indexes
 │   └── seed.ts                     # Default category seeding with embeddings
 ├── helpers/
+│   ├── category-matcher.ts         # Embedding-based category matching/creation utility
 │   ├── config.ts                   # Environment config, constants, system prompt
 │   ├── get-embeddings.ts           # Embedding generation utility (calls roxie-embedder)
+│   ├── profile-loader.ts           # Loads user_profile rows, formats for system prompt injection
 │   └── utils.ts                    # General utility functions
 ├── integrations/
 │   └── tavily/                     # Tavily search integration (placeholder)
 └── tools/
     ├── getCurrentDateTime.ts       # Tool: returns current date and time
+    ├── storeData.ts                # Tool: store structured data with category + embedding
+    ├── searchData.ts               # Tool: semantic similarity search across data_store
+    ├── retrieveData.ts             # Tool: query data_store by category/filters
+    ├── updateData.ts               # Tool: modify existing data_store entries
+    ├── deleteData.ts               # Tool: remove data_store entries
+    ├── setProfile.ts               # Tool: store/update a user profile fact
+    ├── deleteProfile.ts            # Tool: remove a user profile fact
+    ├── listProfile.ts              # Tool: list all user profile facts
     └── index.ts                    # Tool registry, exports all tools to agent
 ```
 
@@ -310,9 +337,9 @@ pnpm format
 
 ### Phase 2: Memory & Conversation Persistence
 
-- [ ] **Message persistence** — Store every conversation message (user + assistant) in the `messages` table with embeddings. Currently messages only live in LangGraph's in-memory `MemorySaver`.
+- [ ] **Message persistence** — Store conversation messages (user + assistant) with embeddings for long-term retrieval. Currently messages only live in LangGraph's in-memory `MemorySaver`.
 - [ ] **Persistent conversation checkpointing** — Replace `MemorySaver` with `PostgresSaver` (or equivalent) so conversation history survives server restarts.
-- [ ] **Long-term memory retrieval** — When the LLM needs context beyond the current conversation window, semantic-search the `messages` table and inject relevant past messages into context.
+- [ ] **Long-term memory retrieval** — When the LLM needs context beyond the current conversation window, semantic-search stored messages and inject relevant past context.
 - [ ] **Short-term memory window** — Enforce a sliding window of last ~20 messages in LLM context to keep token usage manageable while maintaining conversational coherence.
 - [ ] **Memory confirmation flow** — Before storing a memory/data point, Roxie confirms with the user. Embeddings are generated only *after* confirmation, not speculatively.
 

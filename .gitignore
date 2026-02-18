@@ -3,12 +3,27 @@ roxie-brain/dist
 roxie-brain/.env
 
 roxie-web-ui/node_modules
+roxie-web-ui/.env
+
+roxie-web-chat/node_modules
+roxie-web-chat/dist
+roxie-web-chat/dist-ssr
+roxie-web-chat/.env
+roxie-web-chat/*.local
 
 roxie-embedder/__pycache__
 roxie-embedder/venv
 
 .env.docker
 
+# Logs
+*.log
+*-debug.log*
+
+# Editor / OS
 .claude
 .vscode
+.idea
+.DS_Store
+*.sw?
 .pnpm-store
