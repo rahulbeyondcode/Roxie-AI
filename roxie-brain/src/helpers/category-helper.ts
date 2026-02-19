@@ -58,4 +58,11 @@ const matchOrCreateCategory = async (
   return { id: row.id, name: row.name, isNew };
 };
 
+export const loadCategoryNames = async (): Promise<string[]> => {
+  const { rows } = await sqlDB.query<{ name: string }>(
+    "SELECT name FROM categories ORDER BY usage_count DESC, name ASC"
+  )
+  return rows.map((r) => r.name)
+}
+
 export default matchOrCreateCategory;

@@ -6,6 +6,13 @@ interface ProfileRow {
   category: string
 }
 
+export const checkUserHasName = async (): Promise<boolean> => {
+  const { rows } = await sqlDB.query(
+    "SELECT 1 FROM user_profile WHERE key = 'name' LIMIT 1"
+  )
+  return rows.length > 0
+}
+
 export const loadUserProfile = async (): Promise<string> => {
   const { rows } = await sqlDB.query<ProfileRow>(
     "SELECT key, value, category FROM user_profile ORDER BY category, key"

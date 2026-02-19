@@ -1,11 +1,25 @@
+import logging
 from fastapi import FastAPI, Request
 from sentence_transformers import SentenceTransformer
 import uvicorn
+
+
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "GET /health" not in record.getMessage()
+
+
+logging.getLogger("uvicorn.access").addFilter(HealthCheckFilter())
 
 app = FastAPI()
 
 # Load the embedding model
 model = SentenceTransformer("BAAI/bge-large-en-v1.5")
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 
 @app.post("/embed")
 async def embed(request: Request):

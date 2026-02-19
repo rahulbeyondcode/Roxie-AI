@@ -52,7 +52,7 @@ Her primary job is to **offload Rahul's memory, planning, and mental overhead** 
 | -------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **Frontend**         | React Native (Android-first; web chat exists at `../roxie-web-chat`)                                               |
 | **Backend**          | Node.js + Express + TypeScript (ESM)                                                                               |
-| **AI Orchestration** | LangChain + LangGraph (`createReactAgent`)                                                                         |
+| **AI Orchestration** | LangChain v1 `createAgent` with `createMiddleware` (dynamic system prompt + onboarding gate)                        |
 | **LLM**              | Currently an online LLM API; future plan is to migrate to a locally hosted open-source model running on the server |
 | **Embedding Model**  | Currently `BAAI/bge-large-en-v1.5`; to be replaced with a local model (e.g. `Xenova/all-MiniLM-L6-v2`)             |
 | **Database**         | PostgreSQL + pgvector                                                                                              |
@@ -68,10 +68,14 @@ Her primary job is to **offload Rahul's memory, planning, and mental overhead** 
 - **File**: `src/app.ts`
 - Starts Express server
 - Exposes `POST /api/ask` (primary endpoint)
-- Uses `createReactAgent` with the configured online LLM
+- Uses LangChain v1 `createAgent` with `createMiddleware` (`onboardingGate`)
 - Loads tools from `src/tools/index.ts`
 - Uses `MemorySaver` checkpointing with `thread_id` for short-term conversation context
-- System prompt is static (defined in `src/helpers/config.ts`). Profile management is handled via dedicated tools (`set_profile`, `list_profile`, `delete_profile`) rather than dynamic prompt injection.
+- **Dynamic system prompt** via `wrapModelCall` middleware — runs before every model call:
+  - **No name in DB (onboarding mode):** Uses `ONBOARDING_PROMPT`, restricts tools to only `set_profile`. Roxie cannot store tasks/data until the user's name is saved.
+  - **Name exists (normal mode):** Uses `SYSTEM_PROMPT` + dynamically loaded user profile data + list of existing category names from DB.
+- **Empty response nudging:** If the LLM returns an empty response, the backend re-invokes the agent on the same thread — during onboarding it nudges for name collection, in normal mode it asks a personal question to learn about the user.
+- **Confirmation before saving:** Both prompts instruct Roxie to confirm with the user before calling `store_data` or `set_profile`. No data is saved without explicit user approval.
 
 ### 6.2 Database
 
@@ -180,9 +184,9 @@ Categories are **dynamic, self-organizing, and embedding-driven**. The LLM does 
 **Seeded categories (added at bootstrap):**
 
 ```
-groceries, shopping_clothes, shopping_electronics, shopping_other,
-tasks, work_tasks, borrowed_items, money_owed_to_me, money_i_owe,
-health_tracking, calendar_events, personal_notes, books_media, contacts
+shopping_groceries, shopping_clothes, shopping_electronics, shopping_other,
+personal_tasks, work_tasks, borrowed_items, lend_items, money_owed_to_me,
+money_i_owe, calendar_events, personal_notes, personal_contacts
 ```
 
 **Threshold tuning:**
@@ -196,7 +200,7 @@ health_tracking, calendar_events, personal_notes, books_media, contacts
 | Layer               | Mechanism                                                                              |
 | ------------------- | -------------------------------------------------------------------------------------- |
 | **Short-term**      | In-memory `MemorySaver` checkpointing per `thread_id` (lost on server restart)         |
-| **User profile**    | `user_profile` table — always loaded into system prompt at conversation start           |
+| **User profile**    | `user_profile` table — dynamically loaded into system prompt before every model call via middleware |
 | **Structured data** | Stored in `data_store` with category, JSONB data, and embedding                        |
 
 Embeddings are generated **only after user confirmation** for memory storage. Query embeddings are generated **on-the-fly**.
@@ -215,7 +219,11 @@ Roxie's system prompt establishes her as a **close, emotionally intelligent pers
 - Keeps responses concise unless detail is explicitly needed
 - Treats all information shared by Rahul as private and sensitive
 
-**Profile management:** The system prompt includes guidance on when to use profile tools (`set_profile` for identity-level facts) vs `store_data` (episodic/transactional items). There is no dynamic prompt injection or blocking onboarding gate — if Roxie doesn't know the user's name, she asks casually during natural conversation while still helping with whatever is needed.
+**Profile management:** The system prompt includes guidance on when to use profile tools (`set_profile` for identity-level facts) vs `store_data` (episodic/transactional items).
+
+**Onboarding gate:** An `onboardingGate` middleware (`wrapModelCall`) enforces name collection before Roxie can operate normally. When no name exists in `user_profile`, the middleware swaps to a dedicated `ONBOARDING_PROMPT` and restricts available tools to only `set_profile` — the LLM physically cannot call `store_data` or other tools until a name is saved. Once the name is saved (even mid-conversation), the middleware detects this on the next model call and switches to the full system prompt with all tools.
+
+**Confirmation before saving:** Roxie always tells the user what she plans to save (including the category) and waits for explicit approval before calling any save tool.
 
 ---
 
@@ -289,7 +297,7 @@ src/
 │   ├── schema.ts                   # Table creation (categories, data_store, user_profile) + indexes
 │   └── seed.ts                     # Default category seeding with embeddings
 ├── helpers/
-│   ├── category-matcher.ts         # Embedding-based category matching/creation utility
+│   ├── category-helper.ts          # Embedding-based category matching/creation + category name loader
 │   ├── config.ts                   # Environment config, constants, system prompt
 │   ├── get-embeddings.ts           # Embedding generation utility (calls roxie-embedder)
 │   ├── profile-loader.ts           # Loads user_profile rows, formats for system prompt injection
@@ -341,8 +349,6 @@ pnpm format
 - [ ] **Persistent conversation checkpointing** — Replace `MemorySaver` with `PostgresSaver` (or equivalent) so conversation history survives server restarts.
 - [ ] **Long-term memory retrieval** — When the LLM needs context beyond the current conversation window, semantic-search stored messages and inject relevant past context.
 - [ ] **Short-term memory window** — Enforce a sliding window of last ~20 messages in LLM context to keep token usage manageable while maintaining conversational coherence.
-- [ ] **Memory confirmation flow** — Before storing a memory/data point, Roxie confirms with the user. Embeddings are generated only *after* confirmation, not speculatively.
-
 ### Phase 3: Multi-Intent Parsing
 
 - [ ] **Multi-intent extraction** — Parse a single user message like "Buy milk, borrow shirt from Akshay for tomorrow, and get shoes from Zudio" into 3 separate intents, each independently categorized and stored.
@@ -378,7 +384,6 @@ pnpm format
 
 ### Phase 7: Infrastructure & DevOps
 
-- [ ] **Docker Compose for full stack** — Single `docker-compose.yml` to spin up roxie-brain, roxie-embedder, and PostgreSQL together.
 - [ ] **API authentication** — Add basic auth or API key validation to `/api/ask` to prevent unauthorized access.
 - [ ] **Environment-based configuration** — Separate dev/prod configs, with sensible defaults and validation on startup.
 - [ ] **Health check endpoints** — `/health` on both brain and embedder services for monitoring and Docker health checks.

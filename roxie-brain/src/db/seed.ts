@@ -3,20 +3,19 @@ import { Pool } from "pg";
 import fetchEmbeddings from "../helpers/get-embeddings";
 
 const DEFAULT_CATEGORIES = [
-  "groceries",
+  "shopping_groceries",
   "shopping_clothes",
   "shopping_electronics",
   "shopping_other",
-  "tasks",
+  "personal_tasks",
   "work_tasks",
   "borrowed_items",
+  "lend_items",
   "money_owed_to_me",
   "money_i_owe",
-  "health_tracking",
   "calendar_events",
   "personal_notes",
-  "books_media",
-  "contacts",
+  "personal_contacts",
 ];
 
 const MAX_RETRIES = 5;
@@ -29,9 +28,7 @@ export const seedCategories = async (pool: Pool) => {
   const count = parseInt(rows[0].count, 10);
 
   if (count > 0) {
-    console.log(
-      `Categories already seeded (${count} found), skipping seed`
-    );
+    console.log(`Categories already seeded (${count} found), skipping seed`);
     return;
   }
 
