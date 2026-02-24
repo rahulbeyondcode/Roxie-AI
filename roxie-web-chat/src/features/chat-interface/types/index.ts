@@ -9,7 +9,9 @@ export type MessageStoreType = {
   sessionId: string;
   allMessages: Message[];
   isSendingMessage: boolean;
+  isLoadingGreeting: boolean;
   sendNewMessage: (message: SendMessagePayloadType) => void;
+  fetchGreeting: () => Promise<void>;
 };
 
 export type SendMessagePayloadType = {

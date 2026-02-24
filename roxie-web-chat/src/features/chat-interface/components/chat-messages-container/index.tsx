@@ -4,6 +4,7 @@ import Markdown from "react-markdown";
 import roxieImage from "../../../../assets/images/Roxie_no_bg.png";
 import userIcon from "../../../../assets/images/user-icon.svg";
 import useMessageStore from "../../store";
+import TypingIndicator from "../../../../assets/components/TypingIndicator";
 
 const AssistantMessage = ({ message }: { message: string }) => {
   return (
@@ -35,8 +36,7 @@ const HumanMessage = ({ message }: { message: string }) => {
 const ChatMessagesContainer = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const allMessages = useMessageStore((state) => state.allMessages);
-
-  console.log("allMessages: ", allMessages);
+  const isLoadingGreeting = useMessageStore((state) => state.isLoadingGreeting);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -44,10 +44,12 @@ const ChatMessagesContainer = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [allMessages, scrollToBottom]);
+  }, [allMessages, isLoadingGreeting, scrollToBottom]);
 
   return (
     <div className="custom-scroll-container h-full relative flex flex-col pt-8 pb-4 overflow-y-auto">
+      {isLoadingGreeting && allMessages.length === 0 && <TypingIndicator />}
+
       {(allMessages || [])?.map((msgObject) => {
         if (msgObject?.messageType === "llm") {
           return (

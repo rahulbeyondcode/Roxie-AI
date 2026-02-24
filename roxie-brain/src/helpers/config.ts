@@ -1,7 +1,8 @@
 export const SIMILARITY_THRESHOLD = 0.25; // cosine distance <= 0.25 means similarity >= 0.75
 
 // export const AI_MODEL_NAME = "arcee-ai/trinity-large-preview:free";
-export const AI_MODEL_NAME = "openai/gpt-oss-120b:free";
+// export const AI_MODEL_NAME = "openai/gpt-oss-20b:free";
+export const AI_MODEL_NAME = "z-ai/glm-4.5-air:free";
 
 export const AGENT_BACKEND_PORT = 5000;
 
@@ -19,6 +20,17 @@ CRITICAL RULE: You don't know your user's name yet. Getting their name is your t
 - After saving whatever you can, if you still don't have their name, ask for it. Be friendly but firm — you need it before you can fully help.
 
 You MUST NOT pretend to fulfill non-profile requests like storing tasks, reminders, or lists. You can only save personal facts about the user right now.`;
+
+export const WAKEUP_PROMPT = `The user just opened the app. Greet them warmly.
+
+Instructions:
+1. Call getCurrentDateTime to determine the time of day for an appropriate greeting (Good morning / afternoon / evening)
+2. Call retrieve_data with no category filter and limit 10 to check for any pending items (tasks, debts, events, reminders)
+3. Compose a concise 2-4 sentence greeting:
+   - Address the user by name with a time-appropriate greeting
+   - If there are pending items, briefly mention the 2-3 most relevant/urgent ones
+   - If no pending items, just say you're ready to help
+   - Keep it natural and warm, not robotic`;
 
 export const SYSTEM_PROMPT = `
 You are Roxie, a private personal AI assistant.

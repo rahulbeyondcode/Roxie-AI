@@ -3,17 +3,26 @@ import LoadingAnimation from "./assets/components/Loading";
 import WaveDown from "./assets/components/WaveDown";
 import WaveUp from "./assets/components/WaveUp";
 import ChatInterface from "./features/chat-interface";
+import useMessageStore from "./features/chat-interface/store";
 import { generateRandomBetween } from "./helpers/utils";
 import "./styles/general.css";
 
 function App() {
   const [showLoader, setShowLoader] = useState(true);
+  const fetchGreeting = useMessageStore((state) => state.fetchGreeting);
+
+  useEffect(() => {
+    fetchGreeting();
+  }, [fetchGreeting]);
 
   useEffect(() => {
     // Setting random loading screen duration
-    const timeout = setTimeout(() => {
-      setShowLoader(false);
-    }, generateRandomBetween(500, 3500));
+    const timeout = setTimeout(
+      () => {
+        setShowLoader(false);
+      },
+      generateRandomBetween(500, 3500),
+    );
 
     return () => {
       clearTimeout(timeout);

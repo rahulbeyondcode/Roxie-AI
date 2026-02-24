@@ -343,13 +343,7 @@ pnpm format
 
 > **Maintenance rule:** Remove tasks from this list as they are completed. This file should always reflect only what remains to be done.
 
-### Phase 2: Memory & Conversation Persistence
-
-- [ ] **Message persistence** — Store conversation messages (user + assistant) with embeddings for long-term retrieval. Currently messages only live in LangGraph's in-memory `MemorySaver`.
-- [ ] **Persistent conversation checkpointing** — Replace `MemorySaver` with `PostgresSaver` (or equivalent) so conversation history survives server restarts.
-- [ ] **Long-term memory retrieval** — When the LLM needs context beyond the current conversation window, semantic-search stored messages and inject relevant past context.
-- [ ] **Short-term memory window** — Enforce a sliding window of last ~20 messages in LLM context to keep token usage manageable while maintaining conversational coherence.
-### Phase 3: Multi-Intent Parsing
+### Phase 2: Multi-Intent Parsing
 
 - [ ] **Multi-intent extraction** — Parse a single user message like "Buy milk, borrow shirt from Akshay for tomorrow, and get shoes from Zudio" into 3 separate intents, each independently categorized and stored.
 - [ ] **Context preservation across intents** — When splitting intents, preserve contextual information (e.g., "from Akshay" applies to the shirt, not the milk).

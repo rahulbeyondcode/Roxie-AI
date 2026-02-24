@@ -14,10 +14,11 @@ import {
   AI_MODEL_NAME,
   ONBOARDING_PROMPT,
   SYSTEM_PROMPT,
+  WAKEUP_PROMPT,
 } from "./helpers/config";
 import { loadCategoryNames } from "./helpers/category-helper";
 import { checkUserHasName, loadUserProfile } from "./helpers/profile-loader";
-import { generateRandomString } from "./helpers/utils";
+import { generateRandomString, handleApiError } from "./helpers/utils";
 import { tools } from "./tools";
 
 dotenv.config();
@@ -125,32 +126,56 @@ router.post("/ask", async (req: Request, res: Response) => {
       thread_id,
     });
   } catch (error: any) {
-    console.error("AI error: ", error);
+    handleApiError(error, res, "interacting with the AI model");
+  }
+});
 
-    if (error.response?.status === 401) {
-      res.status(401).send({
-        message:
-          "Invalid API key for OpenRouter. Please check your configuration.",
-        error: error.message,
-      });
-    } else if (error.response?.status === 429) {
-      res.status(429).send({
-        message:
-          "Rate limit exceeded for OpenRouter API. Please try again later.",
-        error: error.message,
-      });
-    } else if (error.code === "ECONNRESET" || error.code === "ENOTFOUND") {
-      res.status(503).send({
-        message:
-          "Network error connecting to OpenRouter API. Please check your connection.",
-        error: error.message,
-      });
-    } else {
-      res.status(500).send({
-        message: "Error interacting with the AI model",
-        error: error.message || "Unknown error occurred",
-      });
+router.post("/greet", async (req: Request, res: Response) => {
+  const thread_id = req.body?.thread_id || generateRandomString(7);
+
+  console.log(`👋 Greeting request for thread ${thread_id}`);
+
+  try {
+    const hasName = await checkUserHasName();
+    const prompt = hasName
+      ? WAKEUP_PROMPT
+      : "Hello, I just opened the app.";
+
+    const result = await agent.invoke(
+      {
+        messages: [new HumanMessage(prompt)],
+      },
+      { configurable: { thread_id } }
+    );
+
+    let aiResponse = result?.messages.at(-1)?.content || "";
+
+    if (!String(aiResponse).trim()) {
+      const nudge = hasName
+        ? "I have nothing else right now. Ask me something about myself."
+        : "I didn't answer yet. Ask me for my name — you need it before you can help me.";
+
+      console.log(
+        `👋 Empty greeting response, nudging towards ${hasName ? "personal question" : "name collection"}`
+      );
+
+      const followUp = await agent.invoke(
+        { messages: [new HumanMessage(nudge)] },
+        { configurable: { thread_id } }
+      );
+
+      aiResponse = followUp?.messages.at(-1)?.content || "";
     }
+
+    console.log(`👋 -> ${aiResponse}`);
+    console.log("\n");
+
+    res.json({
+      message: `${aiResponse}`,
+      thread_id,
+    });
+  } catch (error: any) {
+    handleApiError(error, res, "generating greeting");
   }
 });
 
